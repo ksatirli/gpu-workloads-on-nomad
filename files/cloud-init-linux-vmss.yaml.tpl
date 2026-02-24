@@ -18,8 +18,8 @@ write_files:
   - path: /etc/nomad.d/nomad.hcl
     owner: root:root
     permissions: '0644'
-    content: |
-${nomad_config}
+    encoding: b64
+    content: ${nomad_config_b64}
 
 # nomad-autoscaler and nomad-device-nvidia are not in apt; install from HashiCorp releases
 runcmd:
