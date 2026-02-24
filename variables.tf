@@ -43,6 +43,17 @@ variable "azurerm_vmss_linux_instance_count" {
   type        = number
 }
 
+variable "nomad_server_count" {
+  default     = 3
+  description = "Number of VMSS instances that run as Nomad servers (first N by instance ID). Use 3 or 5 for production quorum."
+  type        = number
+
+  validation {
+    condition     = var.nomad_server_count >= 1 && var.nomad_server_count <= var.azurerm_vmss_linux_instance_count
+    error_message = "nomad_server_count must be between 1 and azurerm_vmss_linux_instance_count."
+  }
+}
+
 variable "azurerm_vmss_windows_instance_count" {
   default     = 0
   description = "Number of Windows VM instances in the scale set."

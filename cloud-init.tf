@@ -1,12 +1,21 @@
 locals {
-  nomad_config_raw = templatefile("${path.module}/files/nomad-client.hcl.tpl", {
+  nomad_client_config_raw = templatefile("${path.module}/files/nomad-client.hcl.tpl", {
     subscription_id = var.azurerm_subscription_id
     resource_group  = azurerm_resource_group.main.name
     vm_scale_set    = local.vm_scale_set_name
   })
 
+  nomad_server_config_raw = templatefile("${path.module}/files/nomad-server.hcl.tpl", {
+    subscription_id  = var.azurerm_subscription_id
+    resource_group   = azurerm_resource_group.main.name
+    vm_scale_set     = local.vm_scale_set_name
+    bootstrap_expect = var.nomad_server_count
+  })
+
   cloud_init_linux_content = templatefile("${path.module}/files/cloud-init-linux-vmss.yaml.tpl", {
-    nomad_config_b64 = base64encode(local.nomad_config_raw)
+    nomad_client_config_b64 = base64encode(local.nomad_client_config_raw)
+    nomad_server_config_b64 = base64encode(local.nomad_server_config_raw)
+    nomad_server_count      = var.nomad_server_count
   })
 }
 

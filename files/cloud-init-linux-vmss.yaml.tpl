@@ -31,14 +31,27 @@ packages:
   - unzip
 
 write_files:
-  - path: /etc/nomad.d/nomad.hcl
+  - path: /etc/nomad.d/nomad-server.hcl
     owner: root:root
     permissions: '0644'
     encoding: b64
-    content: ${nomad_config_b64}
+    content: ${nomad_server_config_b64}
+  - path: /etc/nomad.d/nomad-client.hcl
+    owner: root:root
+    permissions: '0644'
+    encoding: b64
+    content: ${nomad_client_config_b64}
 
 # Post-install: CDI for Podman, HashiCorp plugins (not in apt)
 runcmd:
+  - |
+    INSTANCE_ID=$(curl -s -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | python3 -c "import sys,json; print(json.load(sys.stdin)['compute']['instanceId'])" 2>/dev/null || echo "999")
+    if [ "$${INSTANCE_ID}" -lt "${nomad_server_count}" ]; then
+      cp /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad.hcl
+    else
+      cp /etc/nomad.d/nomad-client.hcl /etc/nomad.d/nomad.hcl
+    fi
+    rm -f /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad-client.hcl
   - |
     mkdir -p /etc/cdi
     nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml

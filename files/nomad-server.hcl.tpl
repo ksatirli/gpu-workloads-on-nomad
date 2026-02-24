@@ -7,6 +7,11 @@ addresses {
   http = "0.0.0.0"
 }
 
+server {
+  enabled          = true
+  bootstrap_expect = ${bootstrap_expect}
+}
+
 client {
   enabled = true
 }
