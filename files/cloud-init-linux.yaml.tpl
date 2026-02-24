@@ -14,18 +14,27 @@ packages:
   - curl
   - unzip
 
+write_files:
+  - path: /etc/nomad.d/nomad.hcl
+    owner: root:root
+    permissions: '0644'
+    content: |
+${nomad_config}
+
 # nomad-autoscaler and nomad-device-nvidia are not in apt; install from HashiCorp releases
 runcmd:
   - |
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     mkdir -p /opt/nomad/data/plugins
-    curl -fsSLo /tmp/nomad-device-nvidia.zip "https://releases.hashicorp.com/nomad-device-nvidia/1.1.0/nomad-device-nvidia_1.1.0_linux_${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-device-nvidia.zip "https://releases.hashicorp.com/nomad-device-nvidia/1.1.0/nomad-device-nvidia_1.1.0_linux_$${ARCH}.zip"
     unzip -o /tmp/nomad-device-nvidia.zip -d /opt/nomad/data/plugins
     chmod +x /opt/nomad/data/plugins/nomad-device-nvidia
     rm /tmp/nomad-device-nvidia.zip
   - |
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
-    curl -fsSLo /tmp/nomad-autoscaler.zip "https://releases.hashicorp.com/nomad-autoscaler/0.4.9/nomad-autoscaler_0.4.9_linux_${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-autoscaler.zip "https://releases.hashicorp.com/nomad-autoscaler/0.4.9/nomad-autoscaler_0.4.9_linux_$${ARCH}.zip"
     unzip -o /tmp/nomad-autoscaler.zip -d /usr/local/bin
     chmod +x /usr/local/bin/nomad-autoscaler
     rm /tmp/nomad-autoscaler.zip
+  - systemctl enable nomad
+  - systemctl start nomad
