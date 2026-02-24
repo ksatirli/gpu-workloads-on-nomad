@@ -50,6 +50,10 @@ variable "project_identifier" {
   type        = string
 }
 
+locals {
+  project_identifier_clean = replace(var.project_identifier, "-", "")
+}
+
 variable "azurerm_vnet_address_space" {
   default = [
     "10.0.0.0/16"
