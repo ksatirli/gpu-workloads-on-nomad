@@ -68,3 +68,21 @@ variable "azurerm_vmss_subnet_address_prefix" {
   description = " The address prefixes to use for the subnet."
   type        = string
 }
+
+variable "azurerm_vmss_admin_username" {
+  default     = "azureuser"
+  description = "Admin username for the Linux VM scale set instances."
+  type        = string
+}
+
+variable "azurerm_vmss_instance_count" {
+  default     = 3
+  description = "Number of Linux VM instances in the scale set."
+  type        = number
+}
+
+variable "azurerm_vmss_sku" {
+  default     = "Standard_B2s"
+  description = "VM size for the scale set instances (e.g. Standard_B2s, Standard_D2s_v3)."
+  type        = string
+}
