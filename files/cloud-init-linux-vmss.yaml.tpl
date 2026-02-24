@@ -1,4 +1,5 @@
 #cloud-config
+
 # Nomad installation per https://developer.hashicorp.com/nomad/docs/deploy
 apt:
   preserve_sources_list: true
@@ -7,11 +8,26 @@ apt:
       source: "deb [signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
       keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
       keyserver: keyserver.ubuntu.com
+    nvidia-container-toolkit-amd64:
+      source: "deb [signed-by=$KEY_FILE] https://nvidia.github.io/libnvidia-container/stable/deb/amd64 /"
+      keyid: DDCAE044F796ECB0
+      keyserver: keyserver.ubuntu.com
+    nvidia-container-toolkit-arm64:
+      source: "deb [signed-by=$KEY_FILE] https://nvidia.github.io/libnvidia-container/stable/deb/arm64 /"
+      keyid: DDCAE044F796ECB0
+      keyserver: keyserver.ubuntu.com
 
 packages:
+  - ca-certificates
   - curl
+  - gnupg2
+  - libnvidia-container-tools
+  - libnvidia-container1
   - nomad
   - nomad-driver-podman
+  - nvidia-container-toolkit
+  - nvidia-container-toolkit-base
+  - podman
   - unzip
 
 write_files:
@@ -21,8 +37,13 @@ write_files:
     encoding: b64
     content: ${nomad_config_b64}
 
-# nomad-autoscaler and nomad-device-nvidia are not in apt; install from HashiCorp releases
+# Post-install: CDI for Podman, HashiCorp plugins (not in apt)
 runcmd:
+  - |
+    mkdir -p /etc/cdi
+    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+    rm -f /usr/share/containers/oci/hooks.d/oci-nvidia-hook.json
+# nomad-autoscaler, nomad-device-nvidia, and nomad-driver-exec2 are not in apt; install from HashiCorp releases
   - |
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     mkdir -p /opt/nomad/data/plugins
@@ -30,6 +51,12 @@ runcmd:
     unzip -o /tmp/nomad-device-nvidia.zip -d /opt/nomad/data/plugins
     chmod +x /opt/nomad/data/plugins/nomad-device-nvidia
     rm /tmp/nomad-device-nvidia.zip
+  - |
+    ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
+    curl -fsSLo /tmp/nomad-driver-exec2.zip "https://releases.hashicorp.com/nomad-driver-exec2/0.1.1/nomad-driver-exec2_0.1.1_linux_$${ARCH}.zip"
+    unzip -o /tmp/nomad-driver-exec2.zip -d /opt/nomad/data/plugins
+    chmod +x /opt/nomad/data/plugins/nomad-driver-exec2
+    rm /tmp/nomad-driver-exec2.zip
   - |
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     curl -fsSLo /tmp/nomad-autoscaler.zip "https://releases.hashicorp.com/nomad-autoscaler/0.4.9/nomad-autoscaler_0.4.9_linux_$${ARCH}.zip"
