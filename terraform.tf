@@ -19,6 +19,12 @@ terraform {
       version = ">= 4.61.0, < 5.0.0"
     }
 
+    # see https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs
+    cloudinit = {
+      source  = "hashicorp/cloudinit"
+      version = ">= 2.3.0, < 3.0.0"
+    }
+
     # see https://registry.terraform.io/providers/IBM-Cloud/ibm/1.88.0/docs
     ibm = {
       source  = "IBM-Cloud/ibm"
