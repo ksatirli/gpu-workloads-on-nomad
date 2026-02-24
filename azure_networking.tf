@@ -49,3 +49,32 @@ resource "azurerm_subnet_nat_gateway_association" "main" {
   nat_gateway_id = azurerm_nat_gateway.main.id
   subnet_id      = azurerm_subnet.main.id
 }
+
+# Network Security Group for VMSS - allows Nomad inter-instance communication
+# see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group
+resource "azurerm_network_security_group" "vmss" {
+  location            = azurerm_resource_group.main.location
+  name                = "${var.project_identifier}-vmss-nsg"
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+# Nomad ports - allow traffic from other instances in the scale set (same subnet/VNet)
+# see https://developer.hashicorp.com/nomad/docs/install/production/requirements
+resource "azurerm_network_security_rule" "nomad_from_vnet" {
+  access                      = "Allow"
+  direction                   = "Inbound"
+  name                        = "AllowNomadFromVNet"
+  network_security_group_name = azurerm_network_security_group.vmss.name
+  priority                    = 100
+  protocol                    = "Tcp"
+  resource_group_name         = azurerm_resource_group.main.name
+  source_address_prefix       = var.azurerm_vnet_address_space[0]
+  source_port_range           = "*"
+  destination_address_prefix  = "*"
+
+  destination_port_ranges = [
+    "4646", # HTTP API
+    "4647", # RPC
+    "4648"  # Serf Gossip
+  ]
+}

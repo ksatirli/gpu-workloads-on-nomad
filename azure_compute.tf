@@ -18,8 +18,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   }
 
   network_interface {
-    name    = "vmss-nic"
-    primary = true
+    name                      = "vmss-nic"
+    primary                   = true
+    network_security_group_id = azurerm_network_security_group.vmss.id
 
     ip_configuration {
       name      = "internal"

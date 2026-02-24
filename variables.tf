@@ -25,6 +25,12 @@ variable "azurerm_vmss_subnet_address_prefix" {
   type        = string
 }
 
+variable "azurerm_bastion_subnet_address_prefix" {
+  default     = "10.0.0.0/26" # /26 minimum for AzureBastionSubnet
+  description = "Address prefix for Azure Bastion subnet."
+  type        = string
+}
+
 variable "azurerm_vmss_admin_username" {
   default     = "azureuser"
   description = "Admin username for the Linux VM scale set instances."
