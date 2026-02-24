@@ -1,4 +1,3 @@
-# Nomad client configuration - customize or override via nomad_config_path variable
 datacenter = "dc1"
 
 client {
