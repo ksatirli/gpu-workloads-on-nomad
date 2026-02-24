@@ -1,7 +1,7 @@
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine_scale_set
 resource "azurerm_linux_virtual_machine_scale_set" "main" {
   admin_username      = var.azurerm_vmss_admin_username
-  custom_data         = base64encode(file("${path.module}/scripts/cloud-init-linux.sh"))
+  custom_data         = base64encode(file("${path.module}/scripts/cloud-init-linux.yaml"))
   location            = azurerm_resource_group.main.location
   name                = "${var.project_identifier}-vmss"
   resource_group_name = azurerm_resource_group.main.name

@@ -1,0 +1,31 @@
+#cloud-config
+# Nomad installation per https://developer.hashicorp.com/nomad/docs/deploy
+apt:
+  preserve_sources_list: true
+  sources:
+    hashicorp:
+      source: "deb [signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
+      keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
+      keyserver: keyserver.ubuntu.com
+
+packages:
+  - nomad
+  - nomad-driver-podman
+  - curl
+  - unzip
+
+# nomad-autoscaler and nomad-device-nvidia are not in apt; install from HashiCorp releases
+runcmd:
+  - |
+    ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
+    mkdir -p /opt/nomad/data/plugins
+    curl -fsSLo /tmp/nomad-device-nvidia.zip "https://releases.hashicorp.com/nomad-device-nvidia/1.1.0/nomad-device-nvidia_1.1.0_linux_${ARCH}.zip"
+    unzip -o /tmp/nomad-device-nvidia.zip -d /opt/nomad/data/plugins
+    chmod +x /opt/nomad/data/plugins/nomad-device-nvidia
+    rm /tmp/nomad-device-nvidia.zip
+  - |
+    ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
+    curl -fsSLo /tmp/nomad-autoscaler.zip "https://releases.hashicorp.com/nomad-autoscaler/0.4.9/nomad-autoscaler_0.4.9_linux_${ARCH}.zip"
+    unzip -o /tmp/nomad-autoscaler.zip -d /usr/local/bin
+    chmod +x /usr/local/bin/nomad-autoscaler
+    rm /tmp/nomad-autoscaler.zip
