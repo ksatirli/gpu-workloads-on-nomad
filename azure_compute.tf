@@ -1,11 +1,11 @@
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine_scale_set
 resource "azurerm_linux_virtual_machine_scale_set" "main" {
-  admin_username = var.azurerm_vmss_admin_username
-  location       = azurerm_resource_group.main.location
-  name           = "${var.project_identifier}-vmss"
+  admin_username      = var.azurerm_vmss_admin_username
+  location            = azurerm_resource_group.main.location
+  name                = "${var.project_identifier}-vmss"
   resource_group_name = azurerm_resource_group.main.name
-  sku            = var.azurerm_vmss_sku
-  instances      = var.azurerm_vmss_instance_count
+  sku                 = var.azurerm_vmss_sku
+  instances           = var.azurerm_vmss_linux_instance_count
 
   admin_ssh_key {
     public_key = tls_private_key.main.public_key_openssh
@@ -29,9 +29,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   }
 
   source_image_reference {
-    offer     = "0001-com-ubuntu-server-jammy"
-    publisher = "canonical"
-    sku       = "22_04-lts"
-    version   = "latest"
+    offer     = var.azurerm_vmss_linux_source_image_reference.offer
+    publisher = var.azurerm_vmss_linux_source_image_reference.publisher
+    sku       = var.azurerm_vmss_linux_source_image_reference.sku
+    version   = var.azurerm_vmss_linux_source_image_reference.version
   }
 }

@@ -10,6 +10,63 @@ variable "azurerm_subscription_id" {
   description = "Azure Subscription ID."
 }
 
+variable "azurerm_vnet_address_space" {
+  default = [
+    "10.0.0.0/16"
+  ]
+
+  description = "The address space that is used the virtual network."
+  type        = list(string)
+}
+
+variable "azurerm_vmss_subnet_address_prefix" {
+  default     = "10.0.1.0/24" # /24 nets approx 250 usable IPs
+  description = " The address prefixes to use for the subnet."
+  type        = string
+}
+
+variable "azurerm_vmss_admin_username" {
+  default     = "azureuser"
+  description = "Admin username for the Linux VM scale set instances."
+  type        = string
+}
+
+variable "azurerm_vmss_linux_instance_count" {
+  default     = 3
+  description = "Number of Linux VM instances in the scale set."
+  type        = number
+}
+
+variable "azurerm_vmss_windows_instance_count" {
+  default     = 0
+  description = "Number of Windows VM instances in the scale set."
+  type        = number
+}
+
+variable "azurerm_vmss_sku" {
+  default     = "Standard_B2s"
+  description = "VM size for the scale set instances."
+  type        = string
+}
+
+variable "azurerm_vmss_linux_source_image_reference" {
+  default = {
+    offer     = "ubuntu-24_04-lts"
+    publisher = "canonical"
+    sku       = "server"
+    version   = "latest"
+  }
+
+  description = "Source image reference for the Linux VM scale set."
+
+  type = object({
+    publisher = string
+    offer     = string
+    sku       = string
+    version   = string
+  })
+}
+
 variable "ibm_resource_group_name" {
   default     = "nomad-gpu-workloads"
   description = "The name of the resource group."
@@ -52,37 +109,4 @@ variable "project_identifier" {
 
 locals {
   project_identifier_clean = replace(var.project_identifier, "-", "")
-}
-
-variable "azurerm_vnet_address_space" {
-  default = [
-    "10.0.0.0/16"
-  ]
-
-  description = "The address space that is used the virtual network."
-  type        = list(string)
-}
-
-variable "azurerm_vmss_subnet_address_prefix" {
-  default     = "10.0.1.0/24" # /24 nets approx 250 usable IPs
-  description = " The address prefixes to use for the subnet."
-  type        = string
-}
-
-variable "azurerm_vmss_admin_username" {
-  default     = "azureuser"
-  description = "Admin username for the Linux VM scale set instances."
-  type        = string
-}
-
-variable "azurerm_vmss_instance_count" {
-  default     = 3
-  description = "Number of Linux VM instances in the scale set."
-  type        = number
-}
-
-variable "azurerm_vmss_sku" {
-  default     = "Standard_B2s"
-  description = "VM size for the scale set instances (e.g. Standard_B2s, Standard_D2s_v3)."
-  type        = string
 }
