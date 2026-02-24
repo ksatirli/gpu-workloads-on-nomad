@@ -44,9 +44,16 @@ variable "azurerm_vmss_windows_instance_count" {
 }
 
 variable "azurerm_vmss_sku" {
+  # only N-Series VMs support GPU workloads
   default     = "Standard_B2s"
   description = "VM size for the scale set instances."
   type        = string
+}
+
+variable "azurerm_vmss_install_nvidia_gpu_extension" {
+  default     = false
+  description = "Install NVIDIA GPU driver extension on VMSS instances."
+  type        = bool
 }
 
 variable "azurerm_vmss_linux_source_image_reference" {
