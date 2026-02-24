@@ -7,7 +7,7 @@ locals {
 resource "azurerm_user_assigned_identity" "vmss" {
   location            = azurerm_resource_group.main.location
   name                = "${var.project_identifier}-vmss-identity"
-  resource_group_name  = azurerm_resource_group.main.name
+  resource_group_name = azurerm_resource_group.main.name
 }
 
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine_scale_set
@@ -33,9 +33,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
     network_security_group_id = azurerm_network_security_group.vmss.id
 
     ip_configuration {
-      name      = "internal"
-      primary   = true
-      subnet_id = azurerm_subnet.main.id
+      name                                   = "internal"
+      primary                                = true
+      subnet_id                              = azurerm_subnet.main.id
+      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.main.id]
     }
   }
 
