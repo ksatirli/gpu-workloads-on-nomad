@@ -9,9 +9,9 @@ apt:
       keyserver: keyserver.ubuntu.com
 
 packages:
+  - curl
   - nomad
   - nomad-driver-podman
-  - curl
   - unzip
 
 write_files:
