@@ -50,3 +50,17 @@ variable "project_identifier" {
   type        = string
 }
 
+variable "azurerm_vnet_address_space" {
+  default = [
+    "10.0.0.0/16"
+  ]
+
+  description = "The address space that is used the virtual network."
+  type        = list(string)
+}
+
+variable "azurerm_vmss_subnet_address_prefix" {
+  default     = "10.0.1.0/24" # /24 nets approx 250 usable IPs
+  description = " The address prefixes to use for the subnet."
+  type        = string
+}

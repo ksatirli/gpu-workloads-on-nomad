@@ -1,4 +1,16 @@
 terraform {
+  # see https://developer.hashicorp.com/terraform/language/block/terraform#cloud
+  cloud {
+    organization = "a-demo-organization"
+
+    # optionally use `app.eu.terraform.io` for a Europe-hosted TFE instance
+    hostname = "app.terraform.io"
+
+    workspaces {
+      name = "nomad-gpu-workloads"
+    }
+  }
+
   # see https://developer.hashicorp.com/terraform/language/block/terraform#required_providers
   required_providers {
     # see https://registry.terraform.io/providers/hashicorp/azurerm/4.61.0
