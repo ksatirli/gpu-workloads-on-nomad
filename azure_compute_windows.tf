@@ -60,7 +60,7 @@ resource "azurerm_network_interface_security_group_association" "windows" {
   network_security_group_id = azurerm_network_security_group.vmss.id
 }
 
-# Custom Script Extension to install Nomad on Windows
+# Custom Script Extension to install Nomad on Windows (only when Windows instance exists)
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension
 resource "azurerm_virtual_machine_extension" "nomad_install" {
   count = var.azurerm_windows_instance_count > 0 ? 1 : 0
@@ -71,8 +71,9 @@ resource "azurerm_virtual_machine_extension" "nomad_install" {
   type_handler_version = "1.10"
   virtual_machine_id   = azurerm_windows_virtual_machine.main[0].id
 
-  settings = jsonencode({
+  # Only reference storage resources when count > 0 to avoid evaluation errors
+  settings = var.azurerm_windows_instance_count > 0 ? jsonencode({
     fileUris         = ["${azurerm_storage_account.boot_logs.primary_blob_endpoint}${azurerm_storage_container.scripts[0].name}/${azurerm_storage_blob.nomad_install_script[0].name}?${data.azurerm_storage_account_sas.script[0].sas}"]
     commandToExecute = "powershell -ExecutionPolicy Bypass -File install-nomad-windows.ps1"
-  })
+  }) : "{}"
 }
