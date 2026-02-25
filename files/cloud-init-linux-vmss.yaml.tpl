@@ -44,8 +44,14 @@ write_files:
 
 # Post-install: CDI for Podman, HashiCorp plugins (not in apt)
 runcmd:
+  # Pick server vs client config by VMSS instance ID (first N instances = servers)
   - |
-    INSTANCE_ID=$(curl -s -H "Metadata: true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | python3 -c "import sys,json; print(json.load(sys.stdin)['compute']['instanceId'])" 2>/dev/null || echo "999")
+    for _ in 1 2 3 4 5; do
+      INSTANCE_ID=$(curl -s -H "Metadata: true" --connect-timeout 2 "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('compute',{}).get('instanceId','999'))" 2>/dev/null || echo "999")
+      case "$${INSTANCE_ID}" in ''|*[!0-9]*) INSTANCE_ID=999;; esac
+      [ "$${INSTANCE_ID}" != "999" ] && break
+      sleep 2
+    done
     if [ "$${INSTANCE_ID}" -lt "${nomad_server_count}" ]; then
       cp /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad.hcl
     else
