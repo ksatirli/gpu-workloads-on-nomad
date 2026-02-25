@@ -54,6 +54,12 @@ variable "nomad_server_count" {
   }
 }
 
+variable "nomad_acl_enabled" {
+  default     = false
+  description = "Toggle to enable Nomad ACLs."
+  type        = bool
+}
+
 variable "azurerm_vmss_windows_instance_count" {
   default     = 0
   description = "Number of Windows VM instances in the scale set."

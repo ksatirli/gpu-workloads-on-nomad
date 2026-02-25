@@ -1,4 +1,5 @@
 datacenter = "dc1"
+data_dir   = "/opt/nomad/data"
 
 # Bind HTTP API to all interfaces so it's reachable via load balancer (remote access)
 # see https://developer.hashicorp.com/nomad/docs/configuration#addresses
@@ -7,7 +8,19 @@ addresses {
   http = "0.0.0.0"
 }
 
-server {
+# Advertise the load balancer address so the web UI uses the reachable public endpoint
+# see https://developer.hashicorp.com/nomad/docs/deploy/clusters/reverse-proxy-ui
+advertise {
+  http = "${http_advertise_addr}"
+}
+
+# CORS headers for web UI (regions API and other browser requests)
+http_api_response_headers {
+  "Access-Control-Allow-Origin" = "*"
+}
+
+# ACLs - bootstrap manually when enabled: nomad acl bootstrap, then nomad acl policy apply anonymous files/nomad-anonymous.policy.hcl
+${acl_enabled ? "acl {\n  enabled = true\n}\n\n" : ""}server {
   enabled          = true
   bootstrap_expect = ${bootstrap_expect}
 }
