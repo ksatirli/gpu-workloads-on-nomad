@@ -24,6 +24,17 @@ locals {
     nomad_server_config_b64 = base64encode(local.nomad_server_config_raw)
     nomad_server_count      = var.nomad_server_count
   })
+
+  # Windows Nomad client config - joins via internal LB
+  nomad_client_windows_config_raw = var.azurerm_windows_instance_count > 0 ? templatefile("${path.module}/files/nomad-client-windows.hcl.tpl", {
+    nomad_server_address = cidrhost(var.azurerm_vmss_subnet_address_prefix, 10)
+    http_advertise_addr  = "${cidrhost(var.azurerm_vmss_subnet_address_prefix, 20)}:4646"
+    acl_enabled          = var.nomad_acl_enabled
+  }) : ""
+
+  nomad_install_script = var.azurerm_windows_instance_count > 0 ? templatefile("${path.module}/files/install-nomad-windows.ps1.tpl", {
+    nomad_client_config = local.nomad_client_windows_config_raw
+  }) : ""
 }
 
 # see https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file

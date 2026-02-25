@@ -66,6 +66,42 @@ variable "azurerm_vmss_windows_instance_count" {
   type        = number
 }
 
+variable "azurerm_windows_instance_count" {
+  default     = 1
+  description = "Number of standalone Windows VMs (Nomad clients). Set to 0 to disable."
+  type        = number
+}
+
+variable "azurerm_windows_admin_username" {
+  default     = "azureuser"
+  description = "Admin username for the Windows VM."
+  type        = string
+}
+
+variable "azurerm_windows_vm_size" {
+  default     = "Standard_D2s_v3"
+  description = "VM size for the Windows instance."
+  type        = string
+}
+
+variable "azurerm_windows_source_image_reference" {
+  default = {
+    offer     = "WindowsServer"
+    publisher = "MicrosoftWindowsServer"
+    sku       = "2025-datacenter-azure-edition"
+    version   = "latest"
+  }
+
+  description = "Source image reference for the Windows VM."
+
+  type = object({
+    publisher = string
+    offer     = string
+    sku       = string
+    version   = string
+  })
+}
+
 variable "azurerm_vmss_sku" {
   # only N-Series VMs support GPU workloads
   default     = "Standard_B2s"
