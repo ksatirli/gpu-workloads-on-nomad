@@ -4,8 +4,8 @@
 resource "azurerm_storage_container" "scripts" {
   count = var.azurerm_windows_instance_count > 0 ? 1 : 0
 
-  name                  = "scripts"
-  storage_account_name  = azurerm_storage_account.boot_logs.name
+  name                 = "scripts"
+  storage_account_id   = azurerm_storage_account.boot_logs.id
   container_access_type = "private"
 }
 
@@ -17,7 +17,7 @@ resource "azurerm_storage_blob" "nomad_install_script" {
   storage_container_name = azurerm_storage_container.scripts[0].name
   type                   = "Block"
   content_type           = "text/plain"
-  content                = local.nomad_install_script
+  source_content         = local.nomad_install_script
 }
 
 # SAS token for Custom Script Extension to download the install script
@@ -53,5 +53,7 @@ data "azurerm_storage_account_sas" "script" {
     create  = false
     update  = false
     process = false
+    tag     = false
+    filter  = false
   }
 }

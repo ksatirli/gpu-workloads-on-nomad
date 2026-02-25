@@ -1,5 +1,5 @@
 datacenter = "dc1"
-data_dir   = "C:\\ProgramData\\Nomad\\data"
+data_dir   = "C:\\Nomad\\data"
 
 bind_addr = "0.0.0.0"
 addresses {

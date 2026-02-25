@@ -2,9 +2,10 @@
 $ErrorActionPreference = "Stop"
 $NOMAD_VERSION = "1.11.2"
 $NOMAD_URL = "https://releases.hashicorp.com/nomad/$NOMAD_VERSION/nomad_$NOMAD_VERSION`_windows_amd64.zip"
-$INSTALL_DIR = "C:\Program Files\Nomad"
-$DATA_DIR = "C:\ProgramData\Nomad\data"
-$CONFIG_DIR = "C:\ProgramData\Nomad"
+# Use path without spaces to avoid Windows service path resolution issues
+$INSTALL_DIR = "C:\Nomad\bin"
+$DATA_DIR = "C:\Nomad\data"
+$CONFIG_DIR = "C:\Nomad\config"
 $CONFIG_FILE = "$CONFIG_DIR\nomad-client.hcl"
 
 # Create directories
@@ -28,6 +29,9 @@ $env:Path += ";$INSTALL_DIR"
 ${nomad_client_config}
 '@ | Set-Content -Path $CONFIG_FILE -Encoding UTF8
 
-# Install and start Nomad as Windows service
-& $nomadPath windows service install -config=$CONFIG_FILE
+# Register Nomad as Windows service using sc.exe (more reliable than nomad windows service install)
+# Remove existing service if present (e.g. from failed previous run)
+$svc = Get-Service -Name "Nomad" -ErrorAction SilentlyContinue
+if ($svc) { sc.exe delete "Nomad"; Start-Sleep -Seconds 2 }
+sc.exe create "Nomad" binPath= "`"$nomadPath`" agent -config-dir=`"$CONFIG_DIR`"" start= auto
 Start-Service -Name "Nomad"

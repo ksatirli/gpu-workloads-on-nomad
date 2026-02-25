@@ -28,10 +28,11 @@ resource "azurerm_network_interface" "windows" {
 resource "azurerm_windows_virtual_machine" "main" {
   count = var.azurerm_windows_instance_count > 0 ? 1 : 0
 
-  admin_password      = random_password.windows_admin[0].result
-  admin_username      = var.azurerm_windows_admin_username
-  location            = azurerm_resource_group.main.location
-  name                = "${var.project_identifier}-windows"
+  admin_password       = random_password.windows_admin[0].result
+  admin_username       = var.azurerm_windows_admin_username
+  computer_name        = "nomad-win" # max 15 chars for Windows NetBIOS
+  location             = azurerm_resource_group.main.location
+  name                 = "${var.project_identifier}-windows"
   network_interface_ids = [azurerm_network_interface.windows[0].id]
   resource_group_name = azurerm_resource_group.main.name
   size                = var.azurerm_windows_vm_size
@@ -40,6 +41,8 @@ resource "azurerm_windows_virtual_machine" "main" {
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
   }
+
+  patch_mode = "AutomaticByPlatform" # required for hotpatch-enabled images (e.g. Windows Server 2025 Azure Edition)
 
   source_image_reference {
     offer     = var.azurerm_windows_source_image_reference.offer
