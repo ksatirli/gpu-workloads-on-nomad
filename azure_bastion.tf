@@ -41,3 +41,20 @@ resource "azurerm_network_security_rule" "ssh_from_bastion" {
   destination_address_prefix  = "*"
   destination_port_range      = "22"
 }
+
+# Allow Bastion to reach Windows VM on RDP
+resource "azurerm_network_security_rule" "rdp_from_bastion" {
+  count = var.azurerm_windows_instance_count > 0 ? 1 : 0
+
+  access                      = "Allow"
+  direction                   = "Inbound"
+  name                        = "AllowRDPFromBastion"
+  network_security_group_name = azurerm_network_security_group.vmss.name
+  priority                    = 111
+  protocol                    = "Tcp"
+  resource_group_name         = azurerm_resource_group.main.name
+  source_address_prefix       = "VirtualNetwork"
+  source_port_range           = "*"
+  destination_address_prefix  = "*"
+  destination_port_range      = "3389"
+}

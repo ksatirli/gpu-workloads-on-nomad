@@ -20,6 +20,11 @@ provider "local" {
   # The `local` provider has no configuration
 }
 
+# see https://registry.terraform.io/providers/hashicorp/random/latest/docs
+provider "random" {
+  # The `random` provider has no configuration
+}
+
 # see https://registry.terraform.io/providers/hashicorp/tls/latest/docs
 provider "tls" {
   # The `tls` provider has no configuration
