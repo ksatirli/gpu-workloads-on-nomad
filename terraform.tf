@@ -37,6 +37,12 @@ terraform {
       version = ">= 2.7.0, < 3.0.0"
     }
 
+    # see https://registry.terraform.io/providers/hashicorp/random/latest/docs
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.8.0, < 4.0.0"
+    }
+
     # see https://registry.terraform.io/providers/hashicorp/tls/4.2.0/docs
     tls = {
       source  = "hashicorp/tls"
