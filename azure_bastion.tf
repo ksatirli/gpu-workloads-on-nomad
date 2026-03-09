@@ -18,9 +18,9 @@ resource "azurerm_bastion_host" "main" {
   location            = azurerm_resource_group.main.location
   name                = "${var.project_identifier}-bastion"
   resource_group_name = azurerm_resource_group.main.name
-  sku                 = "Standard"
+  sku                 = var.azurerm_bastion_sku
   tags                = var.tags
-  tunneling_enabled   = true
+  tunneling_enabled   = var.azurerm_bastion_sku == "Standard"
 
   ip_configuration {
     name                 = "configuration"

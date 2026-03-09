@@ -25,6 +25,17 @@ variable "azurerm_vmss_subnet_address_prefix" {
   type        = string
 }
 
+variable "azurerm_bastion_sku" {
+  default     = "Basic"
+  description = "SKU for Azure Bastion. Use Standard for native tunneling (SSH/RDP via az cli), Basic for portal-only access."
+  type        = string
+
+  validation {
+    condition     = contains(["Basic", "Standard"], var.azurerm_bastion_sku)
+    error_message = "azurerm_bastion_sku must be Basic or Standard."
+  }
+}
+
 variable "azurerm_bastion_subnet_address_prefix" {
   default     = "10.0.0.0/26" # /26 minimum for AzureBastionSubnet
   description = "Address prefix for Azure Bastion subnet."
@@ -41,6 +52,12 @@ variable "azurerm_vmss_linux_instance_count" {
   default     = 3
   description = "Number of Linux VM instances in the scale set."
   type        = number
+}
+
+variable "azurerm_vmss_zones" {
+  default     = ["1", "2", "3"]
+  description = "Availability zones for the VMSS. Set to [] to disable zone distribution."
+  type        = list(string)
 }
 
 variable "nomad_server_count" {

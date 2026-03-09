@@ -21,6 +21,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
   resource_group_name = azurerm_resource_group.main.name
   sku                 = var.azurerm_vmss_sku
   instances           = var.azurerm_vmss_linux_instance_count
+  zones               = length(var.azurerm_vmss_zones) > 0 ? var.azurerm_vmss_zones : null
+  zone_balance        = length(var.azurerm_vmss_zones) > 0
 
   admin_ssh_key {
     public_key = tls_private_key.main.public_key_openssh
