@@ -99,6 +99,25 @@ resource "azurerm_lb_rule" "https" {
   protocol                       = "Tcp"
 }
 
+resource "azurerm_lb_probe" "traefik" {
+  loadbalancer_id = azurerm_lb.main.id
+  name            = "traefik-8080"
+  port            = 8080
+  protocol        = "Http"
+  request_path    = "/ping"
+}
+
+resource "azurerm_lb_rule" "traefik" {
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
+  backend_port                   = 8080
+  frontend_ip_configuration_name = "public"
+  frontend_port                  = 8080
+  loadbalancer_id                = azurerm_lb.main.id
+  name                           = "traefik-dashboard"
+  probe_id                       = azurerm_lb_probe.traefik.id
+  protocol                       = "Tcp"
+}
+
 resource "azurerm_lb_rule" "nomad_api" {
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   backend_port                   = 4646
@@ -110,7 +129,7 @@ resource "azurerm_lb_rule" "nomad_api" {
   protocol                       = "Tcp"
 }
 
-# Allow inbound HTTP, HTTPS, and Nomad API from Internet (remote access)
+# Allow inbound traffic from configured source addresses
 resource "azurerm_network_security_rule" "ingress_from_internet" {
   access                      = "Allow"
   direction                   = "Inbound"
@@ -119,10 +138,10 @@ resource "azurerm_network_security_rule" "ingress_from_internet" {
   priority                    = 120
   protocol                    = "Tcp"
   resource_group_name         = azurerm_resource_group.main.name
-  source_address_prefix       = "Internet"
+  source_address_prefixes     = local.ingress_source_addresses
   source_port_range           = "*"
   destination_address_prefix  = "*"
-  destination_port_ranges     = ["80", "443", "4646"]
+  destination_port_ranges     = var.azurerm_ingress_ports
 }
 
 # Allow Azure Load Balancer health probes (required for LB to mark backends healthy)
@@ -137,5 +156,5 @@ resource "azurerm_network_security_rule" "lb_health_probes" {
   source_address_prefix       = "AzureLoadBalancer"
   source_port_range           = "*"
   destination_address_prefix  = "*"
-  destination_port_ranges     = ["80", "443", "4646"]
+  destination_port_ranges     = var.azurerm_ingress_ports
 }
