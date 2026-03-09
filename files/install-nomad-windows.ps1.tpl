@@ -35,4 +35,7 @@ $svc = Get-Service -Name "Nomad" -ErrorAction SilentlyContinue
 if ($svc) { sc.exe delete "Nomad"; Start-Sleep -Seconds 2 }
 sc.exe create "Nomad" binPath= "`"$nomadPath`" agent -config-dir=`"$CONFIG_DIR`"" start= auto
 sc.exe failure "Nomad" reset= 86400 actions= restart/5000/restart/10000/restart/30000
-Start-Service -Name "Nomad"
+
+# Start the service but don't fail the script if servers aren't reachable yet.
+# The restart-on-failure policy will keep retrying automatically.
+Start-Service -Name "Nomad" -ErrorAction SilentlyContinue
