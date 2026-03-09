@@ -64,6 +64,7 @@ runcmd:
     rm -f /usr/share/containers/oci/hooks.d/oci-nvidia-hook.json
 # nomad-autoscaler, nomad-device-nvidia, and nomad-driver-exec2 are not in apt; install from HashiCorp releases
   - |
+    set -e
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     mkdir -p /opt/nomad/data/plugins
     curl -fsSLo /tmp/nomad-device-nvidia.zip "https://releases.hashicorp.com/nomad-device-nvidia/${nomad_device_nvidia_version}/nomad-device-nvidia_${nomad_device_nvidia_version}_linux_$${ARCH}.zip"
@@ -71,12 +72,14 @@ runcmd:
     chmod +x /opt/nomad/data/plugins/nomad-device-nvidia
     rm /tmp/nomad-device-nvidia.zip
   - |
+    set -e
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     curl -fsSLo /tmp/nomad-driver-exec2.zip "https://releases.hashicorp.com/nomad-driver-exec2/${nomad_driver_exec2_version}/nomad-driver-exec2_${nomad_driver_exec2_version}_linux_$${ARCH}.zip"
     unzip -o /tmp/nomad-driver-exec2.zip -d /opt/nomad/data/plugins
     chmod +x /opt/nomad/data/plugins/nomad-driver-exec2
     rm /tmp/nomad-driver-exec2.zip
   - |
+    set -e
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     curl -fsSLo /tmp/nomad-autoscaler.zip "https://releases.hashicorp.com/nomad-autoscaler/${nomad_autoscaler_version}/nomad-autoscaler_${nomad_autoscaler_version}_linux_$${ARCH}.zip"
     unzip -o /tmp/nomad-autoscaler.zip -d /usr/local/bin
