@@ -35,6 +35,26 @@ job "docling" {
       }
     }
 
+    scaling {
+      min     = 1
+      max     = 3
+      enabled = true
+
+      policy {
+        evaluation_interval = "30s"
+        cooldown            = "3m"
+
+        check "cpu" {
+          source = "nomad-apm"
+          query  = "avg_cpu"
+
+          strategy "target-value" {
+            target = 70
+          }
+        }
+      }
+    }
+
     # The docling-serve image is large (~10 GB); allow time for the pull
     update {
       healthy_deadline  = "20m"

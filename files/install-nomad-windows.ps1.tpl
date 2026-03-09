@@ -27,13 +27,13 @@ $env:Path += ";$INSTALL_DIR"
 # Write Nomad client config (single-quote here-string to avoid PowerShell variable expansion)
 @'
 ${nomad_client_config}
-'@ | Set-Content -Path $CONFIG_FILE -Encoding UTF8
+'@ | Out-File -FilePath $CONFIG_FILE -Encoding ASCII
 
 # Register Nomad as Windows service using sc.exe (more reliable than nomad windows service install)
 # Remove existing service if present (e.g. from failed previous run)
 $svc = Get-Service -Name "Nomad" -ErrorAction SilentlyContinue
 if ($svc) { sc.exe delete "Nomad"; Start-Sleep -Seconds 2 }
-sc.exe create "Nomad" binPath= "`"$nomadPath`" agent -config-dir=`"$CONFIG_DIR`"" start= auto
+sc.exe create "Nomad" binPath= "`"$nomadPath`" agent -config=`"$CONFIG_DIR`"" start= auto
 sc.exe failure "Nomad" reset= 86400 actions= restart/5000/restart/10000/restart/30000
 
 # Start the service but don't fail the script if servers aren't reachable yet.

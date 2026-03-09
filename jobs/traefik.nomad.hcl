@@ -1,5 +1,10 @@
 # Traefik reverse proxy - routes traffic to Nomad services
 # see https://doc.traefik.io/traefik/providers/nomad/
+variable "nomad_token" {
+  type        = string
+  description = "Nomad ACL token for service catalog discovery"
+}
+
 job "traefik" {
   datacenters = ["dc1"]
   type        = "system"
@@ -54,7 +59,7 @@ job "traefik" {
 
       # Scoped ACL token for reading Nomad service catalog
       template {
-        data        = "NOMAD_TOKEN=641c80e6-2a17-6c1b-e1be-1a70d62ab425"
+        data        = "NOMAD_TOKEN={{ with nomadVar \"nomad/jobs/traefik\" }}{{ .nomad_token }}{{ end }}"
         destination = "secrets/nomad.env"
         env         = true
       }
