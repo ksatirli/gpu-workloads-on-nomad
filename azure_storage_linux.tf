@@ -6,8 +6,4 @@ resource "azurerm_storage_account" "boot_logs" {
   name                     = "${local.project_identifier_clean}bootlogs"
   resource_group_name      = azurerm_resource_group.main.name
   tags                     = var.tags
-
-  network_rules {
-    default_action = "Allow"
-  }
 }

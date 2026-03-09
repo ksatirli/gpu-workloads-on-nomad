@@ -4,17 +4,15 @@ output "private_key_openssh" {
 }
 
 # SSH to VMSS instances via Azure Bastion
-# Note: Get actual instance IDs with: az vmss list-instances -g nomad-gpu --name nomad-gpu-vmss -o table
-output "ssh_via_bastion" {
-  description = "SSH commands to connect to each VMSS instance via Bastion"
-  value = [
-    for i in range(var.azurerm_vmss_linux_instance_count) :
-    "az network bastion ssh --name ${azurerm_bastion_host.main.name} --resource-group ${azurerm_resource_group.main.name} --target-resource-id /subscriptions/${var.azurerm_subscription_id}/resourceGroups/${azurerm_resource_group.main.name}/providers/Microsoft.Compute/virtualMachineScaleSets/${azurerm_linux_virtual_machine_scale_set.main.name}/virtualMachines/${i} --auth-type ssh-key --username ${var.azurerm_vmss_admin_username} --ssh-key ${abspath("${path.module}/dist/id_ed25519")}"
-  ]
+# VMSS instance IDs may not be sequential (e.g. 0,3,4 after scale operations).
+# Use the list command below to get actual IDs, then substitute into the template.
+output "ssh_via_bastion_template" {
+  description = "SSH command template — replace <INSTANCE_ID> with actual ID from ssh_via_bastion_list_instances"
+  value       = "az network bastion ssh --name ${azurerm_bastion_host.main.name} --resource-group ${azurerm_resource_group.main.name} --target-resource-id /subscriptions/${var.azurerm_subscription_id}/resourceGroups/${azurerm_resource_group.main.name}/providers/Microsoft.Compute/virtualMachineScaleSets/${azurerm_linux_virtual_machine_scale_set.main.name}/virtualMachines/<INSTANCE_ID> --auth-type ssh-key --username ${var.azurerm_vmss_admin_username} --ssh-key ${abspath("${path.module}/dist/id_ed25519")}"
 }
 
 output "ssh_via_bastion_list_instances" {
-  description = "Run this to get actual VMSS instance IDs (may differ from 0,1,2 after scale operations)"
+  description = "List actual VMSS instance IDs for use with ssh_via_bastion_template"
   value       = "az vmss list-instances -g ${azurerm_resource_group.main.name} --name ${azurerm_linux_virtual_machine_scale_set.main.name} -o table"
 }
 

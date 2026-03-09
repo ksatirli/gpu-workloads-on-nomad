@@ -80,6 +80,14 @@ resource "azurerm_role_assignment" "vmss_discovery" {
   scope                = azurerm_resource_group.main.id
 }
 
+# RBAC: allow VMSS MSI to scale the scale set (required for nomad-autoscaler azure-vmss target)
+# see https://developer.hashicorp.com/nomad/tools/autoscaling/plugins/target/azure-vmss
+resource "azurerm_role_assignment" "vmss_autoscaler" {
+  principal_id         = azurerm_user_assigned_identity.vmss.principal_id
+  role_definition_name = "Virtual Machine Contributor"
+  scope                = azurerm_linux_virtual_machine_scale_set.main.id
+}
+
 # NVIDIA GPU driver extension for N-series VMs
 # see https://learn.microsoft.com/en-us/azure/virtual-machines/extensions/hpccompute-gpu-linux
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_scale_set_extension
