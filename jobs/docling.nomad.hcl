@@ -1,0 +1,85 @@
+# Docling - AI-powered document conversion API
+# see https://github.com/docling-project/docling-serve
+job "docling" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  constraint {
+    attribute = "${node.class}"
+    value     = "linux"
+  }
+
+  group "api" {
+    count = 1
+
+    network {
+      port "http" {}
+    }
+
+    service {
+      name     = "docling"
+      port     = "http"
+      provider = "nomad"
+
+      tags = [
+        "traefik.enable=true",
+        "traefik.http.routers.docling.rule=PathPrefix(`/`)",
+        "traefik.http.routers.docling.entrypoints=web",
+      ]
+
+      check {
+        type     = "http"
+        path     = "/health"
+        interval = "15s"
+        timeout  = "5s"
+      }
+    }
+
+    # The docling-serve image is large (~10 GB); allow time for the pull
+    update {
+      healthy_deadline  = "20m"
+      progress_deadline = "25m"
+    }
+
+    restart {
+      attempts = 3
+      interval = "10m"
+      delay    = "30s"
+      mode     = "fail"
+    }
+
+    task "docling-serve" {
+      driver = "podman"
+
+      config {
+        image              = "quay.io/docling-project/docling-serve:latest"
+        image_pull_timeout = "15m"
+        ports              = ["http"]
+
+        command = "docling-serve"
+        args = [
+          "run",
+          "--host", "0.0.0.0",
+          "--port", "${NOMAD_PORT_http}",
+        ]
+      }
+
+      # GPU access via NVIDIA CDI
+      # When running on N-series VMs with GPU drivers installed,
+      # uncomment the device block below to request GPU resources.
+      #
+      # device "nvidia/gpu" {
+      #   count = 1
+      # }
+
+      resources {
+        cpu    = 1000
+        memory = 1024
+      }
+
+      env {
+        DOCLING_SERVE_ENABLE_UI = "true"
+      }
+    }
+  }
+}

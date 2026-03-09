@@ -53,6 +53,13 @@ server_join {
   retry_interval = "15s"
 }
 
+# see https://developer.hashicorp.com/nomad/plugins/drivers/podman
+plugin "nomad-driver-podman" {
+  config {
+    socket_path = "unix:///run/podman/podman.sock"
+  }
+}
+
 # see https://developer.hashicorp.com/nomad/plugins/devices/nvidia
 plugin "nomad-device-nvidia" {
   config {
