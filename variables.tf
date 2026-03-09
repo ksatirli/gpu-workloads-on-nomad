@@ -167,6 +167,12 @@ variable "azurerm_vmss_install_nvidia_gpu_extension" {
   type        = bool
 }
 
+variable "azurerm_vmss_nvidia_gpu_extension_version" {
+  default     = "1.6"
+  description = "Version of the NVIDIA GPU driver extension for VMSS."
+  type        = string
+}
+
 variable "azurerm_vmss_linux_source_image_reference" {
   default = {
     offer     = "ubuntu-24_04-lts"

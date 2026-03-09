@@ -89,7 +89,7 @@ resource "azurerm_virtual_machine_scale_set_extension" "nvidia_gpu" {
   name                         = "NvidiaGpuDriverLinux"
   publisher                    = "Microsoft.HpcCompute"
   type                         = "NvidiaGpuDriverLinux"
-  type_handler_version         = "1.6"
+  type_handler_version         = var.azurerm_vmss_nvidia_gpu_extension_version
   auto_upgrade_minor_version   = true
   virtual_machine_scale_set_id = azurerm_linux_virtual_machine_scale_set.main.id
 }
