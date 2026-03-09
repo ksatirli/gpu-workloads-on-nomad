@@ -5,6 +5,7 @@ resource "azurerm_virtual_network" "main" {
   location            = azurerm_resource_group.main.location
   name                = "${var.project_identifier}-vnet"
   resource_group_name = azurerm_resource_group.main.name
+  tags                = var.tags
 }
 
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip
@@ -14,6 +15,7 @@ resource "azurerm_public_ip" "nat" {
   name                = "${var.project_identifier}-nat-pip"
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 # see https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access
@@ -23,6 +25,7 @@ resource "azurerm_nat_gateway" "main" {
   name                = "${var.project_identifier}-nat"
   resource_group_name = azurerm_resource_group.main.name
   sku_name            = "Standard"
+  tags                = var.tags
 }
 
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/nat_gateway_public_ip_association
@@ -56,6 +59,7 @@ resource "azurerm_network_security_group" "vmss" {
   location            = azurerm_resource_group.main.location
   name                = "${var.project_identifier}-vmss-nsg"
   resource_group_name = azurerm_resource_group.main.name
+  tags                = var.tags
 }
 
 # Internal load balancer for Nomad server discovery (Windows client joins via private IP)
@@ -67,6 +71,7 @@ resource "azurerm_lb" "internal" {
   name                = "${var.project_identifier}-lb-internal"
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "Standard"
+  tags                = var.tags
 
   frontend_ip_configuration {
     name                          = "internal"

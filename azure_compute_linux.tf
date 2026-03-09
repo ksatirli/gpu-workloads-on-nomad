@@ -58,6 +58,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.vmss.id]
   }
+  tags = var.tags
 }
 
 # RBAC: allow VMSS MSI to discover instances (required for go-discover provider=azure vm_scale_set)

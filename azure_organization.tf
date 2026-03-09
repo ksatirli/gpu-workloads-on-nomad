@@ -3,4 +3,5 @@
 resource "azurerm_resource_group" "main" {
   location = var.azurerm_location
   name     = var.project_identifier
+  tags     = var.tags
 }

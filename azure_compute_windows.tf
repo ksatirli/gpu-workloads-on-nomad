@@ -50,6 +50,7 @@ resource "azurerm_windows_virtual_machine" "main" {
     sku       = var.azurerm_windows_source_image_reference.sku
     version   = var.azurerm_windows_source_image_reference.version
   }
+  tags = var.tags
 }
 
 # Associate Windows NIC with VMSS NSG so it can reach Nomad servers

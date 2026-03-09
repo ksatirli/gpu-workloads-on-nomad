@@ -28,6 +28,7 @@ resource "azurerm_public_ip" "lb" {
   name                = "${var.project_identifier}-lb-pip"
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb
@@ -36,6 +37,7 @@ resource "azurerm_lb" "main" {
   name                = "${var.project_identifier}-lb"
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "Standard"
+  tags                = var.tags
 
   frontend_ip_configuration {
     name                 = "public"

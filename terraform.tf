@@ -28,7 +28,7 @@ terraform {
     # see https://registry.terraform.io/providers/IBM-Cloud/ibm/1.88.0/docs
     ibm = {
       source  = "IBM-Cloud/ibm"
-      version = ">= 1.88.0, < 1.89.0"
+      version = ">= 1.88.0, < 2.0.0"
     }
 
     # see https://registry.terraform.io/providers/hashicorp/local/2.7.0/docs

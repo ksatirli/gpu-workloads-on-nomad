@@ -11,6 +11,7 @@ resource "azurerm_public_ip" "bastion" {
   name                = "${var.project_identifier}-bastion-pip"
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 resource "azurerm_bastion_host" "main" {
@@ -18,6 +19,7 @@ resource "azurerm_bastion_host" "main" {
   name                = "${var.project_identifier}-bastion"
   resource_group_name = azurerm_resource_group.main.name
   sku                 = "Standard"
+  tags                = var.tags
   tunneling_enabled   = true
 
   ip_configuration {
