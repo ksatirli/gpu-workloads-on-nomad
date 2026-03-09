@@ -83,6 +83,20 @@ variable "nomad_version_windows" {
   type        = string
 }
 
+variable "nomad_plugin_versions" {
+  default = {
+    device_nvidia = "1.1.0"
+    driver_exec2  = "0.1.1"
+    autoscaler    = "0.4.9"
+  }
+  description = "Versions of Nomad plugins installed on Linux VMSS instances."
+  type = object({
+    device_nvidia = string
+    driver_exec2  = string
+    autoscaler    = string
+  })
+}
+
 variable "tags" {
   default = {
     project = "nomad-gpu-workloads"

@@ -20,9 +20,12 @@ locals {
   })
 
   cloud_init_linux_content = templatefile("${path.module}/files/cloud-init-linux-vmss.yaml.tpl", {
-    nomad_client_config_b64 = base64encode(local.nomad_client_config_raw)
-    nomad_server_config_b64 = base64encode(local.nomad_server_config_raw)
-    nomad_server_count      = var.nomad_server_count
+    nomad_client_config_b64     = base64encode(local.nomad_client_config_raw)
+    nomad_server_config_b64     = base64encode(local.nomad_server_config_raw)
+    nomad_server_count          = var.nomad_server_count
+    nomad_device_nvidia_version = var.nomad_plugin_versions.device_nvidia
+    nomad_driver_exec2_version  = var.nomad_plugin_versions.driver_exec2
+    nomad_autoscaler_version    = var.nomad_plugin_versions.autoscaler
   })
 
   # Windows Nomad client config - joins via internal LB

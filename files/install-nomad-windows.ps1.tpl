@@ -34,4 +34,5 @@ ${nomad_client_config}
 $svc = Get-Service -Name "Nomad" -ErrorAction SilentlyContinue
 if ($svc) { sc.exe delete "Nomad"; Start-Sleep -Seconds 2 }
 sc.exe create "Nomad" binPath= "`"$nomadPath`" agent -config-dir=`"$CONFIG_DIR`"" start= auto
+sc.exe failure "Nomad" reset= 86400 actions= restart/5000/restart/10000/restart/30000
 Start-Service -Name "Nomad"

@@ -92,9 +92,10 @@ resource "azurerm_lb_probe" "internal_nomad" {
   count = var.azurerm_windows_instance_count > 0 ? 1 : 0
 
   loadbalancer_id = azurerm_lb.internal[0].id
-  name            = "nomad-4648"
-  port            = 4648
-  protocol        = "Tcp"
+  name            = "nomad-4646"
+  port            = 4646
+  protocol        = "Http"
+  request_path    = "/v1/agent/health"
 }
 
 resource "azurerm_lb_rule" "internal_nomad_rpc" {

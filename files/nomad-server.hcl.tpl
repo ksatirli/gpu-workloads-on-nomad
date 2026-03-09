@@ -26,7 +26,20 @@ ${acl_enabled ? "acl {\n  enabled = true\n}\n\n" : ""}server {
 }
 
 client {
-  enabled = true
+  enabled    = true
+  node_class = "linux"
+
+  drain_on_shutdown {
+    deadline           = "5m"
+    force              = true
+    ignore_system_jobs = false
+  }
+}
+
+telemetry {
+  publish_allocation_metrics = true
+  publish_node_metrics       = true
+  prometheus_metrics         = true
 }
 
 # Auto-discover Nomad servers via Azure VMSS using Managed Service Identity
@@ -36,7 +49,7 @@ server_join {
     "provider=azure resource_group=${resource_group} vm_scale_set=${vm_scale_set} subscription_id=${subscription_id}"
   ]
 
-  retry_max      = 0
+  retry_max      = 10
   retry_interval = "30s"
 }
 
