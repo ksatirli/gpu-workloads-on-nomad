@@ -71,6 +71,12 @@ variable "nomad_server_count" {
   }
 }
 
+variable "nomad_datacenter" {
+  default     = "dc1"
+  description = "Nomad datacenter name used in all agent configs."
+  type        = string
+}
+
 variable "nomad_acl_enabled" {
   default     = false
   description = "Toggle to enable Nomad ACLs."

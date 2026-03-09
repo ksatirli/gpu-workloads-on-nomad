@@ -1,4 +1,4 @@
-datacenter = "dc1"
+datacenter = "${datacenter}"
 data_dir   = "/opt/nomad/data"
 
 # Bind HTTP API to all interfaces so it's reachable via load balancer (remote access)

@@ -1,4 +1,4 @@
-datacenter = "dc1"
+datacenter = "${datacenter}"
 data_dir   = "C:\\Nomad\\data"
 
 bind_addr = "0.0.0.0"

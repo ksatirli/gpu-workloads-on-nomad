@@ -3,6 +3,7 @@ locals {
   nomad_http_advertise = "${azurerm_public_ip.lb.ip_address}:4646"
 
   nomad_client_config_raw = templatefile("${path.module}/files/nomad-client.hcl.tpl", {
+    datacenter          = var.nomad_datacenter
     subscription_id     = var.azurerm_subscription_id
     resource_group      = azurerm_resource_group.main.name
     vm_scale_set        = local.vm_scale_set_name
@@ -11,6 +12,7 @@ locals {
   })
 
   nomad_server_config_raw = templatefile("${path.module}/files/nomad-server.hcl.tpl", {
+    datacenter          = var.nomad_datacenter
     subscription_id     = var.azurerm_subscription_id
     resource_group      = azurerm_resource_group.main.name
     vm_scale_set        = local.vm_scale_set_name
@@ -30,6 +32,7 @@ locals {
 
   # Windows Nomad client config - joins via internal LB
   nomad_client_windows_config_raw = var.azurerm_windows_instance_count > 0 ? templatefile("${path.module}/files/nomad-client-windows.hcl.tpl", {
+    datacenter           = var.nomad_datacenter
     nomad_server_address = cidrhost(var.azurerm_vmss_subnet_address_prefix, 10)
     http_advertise_addr  = "${cidrhost(var.azurerm_vmss_subnet_address_prefix, 20)}:4646"
     acl_enabled          = var.nomad_acl_enabled
