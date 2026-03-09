@@ -60,7 +60,7 @@ runcmd:
     rm -f /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad-client.hcl
   - |
     mkdir -p /etc/cdi
-    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml || echo "nvidia-ctk cdi generate skipped (no GPU hardware)"
     rm -f /usr/share/containers/oci/hooks.d/oci-nvidia-hook.json
 # nomad-autoscaler, nomad-device-nvidia, and nomad-driver-exec2 are not in apt; install from HashiCorp releases
   - |
