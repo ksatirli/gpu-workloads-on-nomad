@@ -186,6 +186,11 @@ variable "project_identifier" {
   default     = "nomad-gpu"
   description = "Project Identifier."
   type        = string
+
+  validation {
+    condition     = length(replace(var.project_identifier, "-", "")) <= 16
+    error_message = "project_identifier (without hyphens) must be 16 characters or fewer for Azure storage account name limits."
+  }
 }
 
 locals {

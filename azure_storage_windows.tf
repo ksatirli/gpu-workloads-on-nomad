@@ -41,8 +41,8 @@ data "azurerm_storage_account_sas" "script" {
     file  = false
   }
 
-  start  = timestamp()
-  expiry = timeadd(timestamp(), "24h")
+  start  = plantimestamp()
+  expiry = timeadd(plantimestamp(), "24h")
 
   permissions {
     read    = true

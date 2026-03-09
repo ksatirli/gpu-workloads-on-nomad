@@ -1,6 +1,6 @@
 # Install Nomad on Windows - HashiCorp Nomad client
 $ErrorActionPreference = "Stop"
-$NOMAD_VERSION = "1.11.2"
+$NOMAD_VERSION = "${nomad_version}"
 $NOMAD_URL = "https://releases.hashicorp.com/nomad/$NOMAD_VERSION/nomad_$NOMAD_VERSION`_windows_amd64.zip"
 # Use path without spaces to avoid Windows service path resolution issues
 $INSTALL_DIR = "C:\Nomad\bin"
