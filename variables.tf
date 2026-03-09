@@ -55,8 +55,8 @@ variable "azurerm_vmss_linux_instance_count" {
 }
 
 variable "azurerm_vmss_zones" {
-  default     = ["1", "2", "3"]
-  description = "Availability zones for the VMSS. Set to [] to disable zone distribution."
+  default     = []
+  description = "Availability zones for the VMSS (e.g. [\"1\", \"2\", \"3\"]). Requires a zone-capable region. Set to [] to disable."
   type        = list(string)
 }
 

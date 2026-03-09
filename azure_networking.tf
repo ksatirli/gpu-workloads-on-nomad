@@ -45,6 +45,8 @@ resource "azurerm_subnet" "main" {
   name                 = "vmss"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
+
+  service_endpoints = ["Microsoft.Storage"]
 }
 
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_nat_gateway_association
