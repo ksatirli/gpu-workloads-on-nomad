@@ -6,4 +6,11 @@ resource "azurerm_storage_account" "boot_logs" {
   name                     = "${local.project_identifier_clean}bootlogs"
   resource_group_name      = azurerm_resource_group.main.name
   tags                     = var.tags
+
+  # Restrict access to VNet and trusted Azure services (boot diagnostics, monitor agents)
+  network_rules {
+    default_action             = "Deny"
+    bypass                     = ["AzureServices"]
+    virtual_network_subnet_ids = [azurerm_subnet.main.id]
+  }
 }
