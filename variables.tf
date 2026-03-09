@@ -115,6 +115,18 @@ variable "log_analytics_retention_days" {
   type        = number
 }
 
+variable "azurerm_ingress_source_addresses" {
+  default     = null
+  description = "Source IP addresses (CIDR) allowed to reach ingress ports. Defaults to the current public IP of the Terraform runner if not set."
+  type        = list(string)
+}
+
+variable "azurerm_ingress_ports" {
+  default     = ["80", "443", "4646", "8080"]
+  description = "Destination ports opened in the VMSS NSG for external ingress."
+  type        = list(string)
+}
+
 variable "tags" {
   default = {
     project = "nomad-gpu-workloads"
@@ -248,6 +260,13 @@ variable "project_identifier" {
   }
 }
 
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com/"
+}
+
 locals {
   project_identifier_clean = replace(var.project_identifier, "-", "")
+
+  # Use provided source addresses, or fall back to the Terraform runner's public IP
+  ingress_source_addresses = coalesce(var.azurerm_ingress_source_addresses, ["${trimspace(data.http.my_ip.response_body)}/32"])
 }
