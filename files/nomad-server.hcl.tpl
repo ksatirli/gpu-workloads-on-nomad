@@ -34,6 +34,12 @@ client {
     force              = true
     ignore_system_jobs = false
   }
+
+  reserved {
+    cpu    = 500
+    memory = 512
+    disk   = 1024
+  }
 }
 
 telemetry {

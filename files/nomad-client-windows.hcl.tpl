@@ -23,6 +23,12 @@ ${acl_enabled ? "acl {\n  enabled = true\n}\n\n" : ""}client {
     force              = true
     ignore_system_jobs = false
   }
+
+  reserved {
+    cpu    = 256
+    memory = 512
+    disk   = 1024
+  }
 }
 
 telemetry {
