@@ -46,16 +46,24 @@ write_files:
 runcmd:
   # Pick server vs client config by VMSS instance ID (first N instances = servers)
   - |
-    for _ in 1 2 3 4 5; do
-      INSTANCE_ID=$(curl -s -H "Metadata: true" --connect-timeout 2 "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('compute',{}).get('instanceId','999'))" 2>/dev/null || echo "999")
-      case "$${INSTANCE_ID}" in ''|*[!0-9]*) INSTANCE_ID=999;; esac
-      [ "$${INSTANCE_ID}" != "999" ] && break
-      sleep 2
-    done
-    if [ "$${INSTANCE_ID}" -lt "${nomad_server_count}" ]; then
+    NOMAD_SERVER_COUNT=${nomad_server_count}
+    VMSS_INSTANCE_COUNT=${vmss_instance_count}
+    if [ "$${NOMAD_SERVER_COUNT}" -ge "$${VMSS_INSTANCE_COUNT}" ]; then
+      # All instances are servers — no need to check instance ID
       cp /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad.hcl
     else
-      cp /etc/nomad.d/nomad-client.hcl /etc/nomad.d/nomad.hcl
+      # Determine instance ID from IMDS name (e.g. "nomad-gpu-vmss_3" -> 3)
+      for _ in 1 2 3 4 5; do
+        INSTANCE_ID=$(curl -s -H "Metadata: true" --connect-timeout 2 "http://169.254.169.254/metadata/instance/compute/name?api-version=2021-02-01&format=text" 2>/dev/null | grep -oE '[0-9]+$' || echo "999")
+        case "$${INSTANCE_ID}" in ''|*[!0-9]*) INSTANCE_ID=999;; esac
+        [ "$${INSTANCE_ID}" != "999" ] && break
+        sleep 2
+      done
+      if [ "$${INSTANCE_ID}" -lt "$${NOMAD_SERVER_COUNT}" ]; then
+        cp /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad.hcl
+      else
+        cp /etc/nomad.d/nomad-client.hcl /etc/nomad.d/nomad.hcl
+      fi
     fi
     rm -f /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad-client.hcl
   - |

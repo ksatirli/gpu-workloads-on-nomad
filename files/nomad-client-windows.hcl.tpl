@@ -40,5 +40,5 @@ telemetry {
 # Join Nomad servers via internal load balancer (private IP)
 server_join {
   retry_join = ["${nomad_server_address}:4648"]
-  retry_max  = 10
+  retry_max  = 0
 }

@@ -55,8 +55,8 @@ server_join {
     "provider=azure resource_group=${resource_group} vm_scale_set=${vm_scale_set} subscription_id=${subscription_id}"
   ]
 
-  retry_max      = 10
-  retry_interval = "30s"
+  retry_max      = 0
+  retry_interval = "15s"
 }
 
 # see https://developer.hashicorp.com/nomad/plugins/devices/nvidia
