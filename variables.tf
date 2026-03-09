@@ -60,6 +60,21 @@ variable "nomad_acl_enabled" {
   type        = bool
 }
 
+variable "nomad_version_windows" {
+  default     = "1.11.2"
+  description = "Nomad version to install on Windows clients."
+  type        = string
+}
+
+variable "tags" {
+  default = {
+    project = "nomad-gpu-workloads"
+    managed = "terraform"
+  }
+  description = "Tags applied to all Azure resources."
+  type        = map(string)
+}
+
 variable "azurerm_vmss_windows_instance_count" {
   default     = 0
   description = "Number of Windows VM instances in the scale set."
