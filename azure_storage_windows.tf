@@ -4,8 +4,8 @@
 resource "azurerm_storage_container" "scripts" {
   count = var.azurerm_windows_instance_count > 0 ? 1 : 0
 
-  name                 = "scripts"
-  storage_account_id   = azurerm_storage_account.boot_logs.id
+  name                  = "scripts"
+  storage_account_id    = azurerm_storage_account.boot_logs.id
   container_access_type = "private"
 }
 
