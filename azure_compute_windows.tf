@@ -50,6 +50,11 @@ resource "azurerm_windows_virtual_machine" "main" {
     sku       = var.azurerm_windows_source_image_reference.sku
     version   = var.azurerm_windows_source_image_reference.version
   }
+
+  boot_diagnostics {
+    storage_account_uri = azurerm_storage_account.boot_logs.primary_blob_endpoint
+  }
+
   tags = var.tags
 }
 

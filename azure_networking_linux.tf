@@ -71,7 +71,8 @@ resource "azurerm_lb_probe" "nomad" {
   loadbalancer_id = azurerm_lb.main.id
   name            = "nomad-4646"
   port            = 4646
-  protocol        = "Tcp"
+  protocol        = "Http"
+  request_path    = "/v1/agent/health"
 }
 
 # Load balancing rules - HTTP, HTTPS, Nomad API

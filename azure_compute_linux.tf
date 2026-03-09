@@ -58,6 +58,15 @@ resource "azurerm_linux_virtual_machine_scale_set" "main" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.vmss.id]
   }
+
+  boot_diagnostics {
+    storage_account_uri = azurerm_storage_account.boot_logs.primary_blob_endpoint
+  }
+
+  lifecycle {
+    ignore_changes = [instances]
+  }
+
   tags = var.tags
 }
 
