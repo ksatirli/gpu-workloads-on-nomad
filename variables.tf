@@ -103,6 +103,12 @@ variable "nomad_plugin_versions" {
   })
 }
 
+variable "azurerm_sas_token_expiry" {
+  default     = "24h"
+  description = "Duration for storage account SAS token validity (e.g. 24h, 48h, 168h)."
+  type        = string
+}
+
 variable "tags" {
   default = {
     project = "nomad-gpu-workloads"

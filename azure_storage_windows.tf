@@ -42,7 +42,7 @@ data "azurerm_storage_account_sas" "script" {
   }
 
   start  = plantimestamp()
-  expiry = timeadd(plantimestamp(), "24h")
+  expiry = timeadd(plantimestamp(), var.azurerm_sas_token_expiry)
 
   permissions {
     read    = true
