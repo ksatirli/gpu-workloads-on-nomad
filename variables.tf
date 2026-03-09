@@ -109,6 +109,12 @@ variable "azurerm_sas_token_expiry" {
   type        = string
 }
 
+variable "log_analytics_retention_days" {
+  default     = 30
+  description = "Number of days to retain logs in Log Analytics workspace."
+  type        = number
+}
+
 variable "tags" {
   default = {
     project = "nomad-gpu-workloads"
