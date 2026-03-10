@@ -18,6 +18,8 @@ ${acl_enabled ? "acl {\n  enabled = true\n}\n\n" : ""}client {
   enabled    = true
   node_class = "windows"
 
+  servers = ["${nomad_server_address}:4647"]
+
   drain_on_shutdown {
     deadline           = "5m"
     force              = true
@@ -35,10 +37,4 @@ telemetry {
   publish_allocation_metrics = true
   publish_node_metrics       = true
   prometheus_metrics         = true
-}
-
-# Join Nomad servers via internal load balancer (private IP)
-server_join {
-  retry_join = ["${nomad_server_address}:4648"]
-  retry_max  = 0
 }

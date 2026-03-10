@@ -29,6 +29,12 @@ $env:Path += ";$INSTALL_DIR"
 ${nomad_client_config}
 '@ | Out-File -FilePath $CONFIG_FILE -Encoding ASCII
 
+# Open Windows Firewall for Nomad ports (HTTP API, RPC, Serf)
+New-NetFirewallRule -DisplayName "Nomad HTTP" -Direction Inbound -LocalPort 4646 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
+New-NetFirewallRule -DisplayName "Nomad RPC" -Direction Inbound -LocalPort 4647 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
+New-NetFirewallRule -DisplayName "Nomad Serf TCP" -Direction Inbound -LocalPort 4648 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
+New-NetFirewallRule -DisplayName "Nomad Serf UDP" -Direction Inbound -LocalPort 4648 -Protocol UDP -Action Allow -ErrorAction SilentlyContinue
+
 # Register Nomad as Windows service using sc.exe (more reliable than nomad windows service install)
 # Remove existing service if present (e.g. from failed previous run)
 $svc = Get-Service -Name "Nomad" -ErrorAction SilentlyContinue
