@@ -13,14 +13,23 @@ New-Item -ItemType Directory -Force -Path $INSTALL_DIR | Out-Null
 New-Item -ItemType Directory -Force -Path $DATA_DIR | Out-Null
 New-Item -ItemType Directory -Force -Path $CONFIG_DIR | Out-Null
 
-# Download and extract Nomad
-$zipPath = "$env:TEMP\nomad.zip"
-Invoke-WebRequest -Uri $NOMAD_URL -OutFile $zipPath -UseBasicParsing
-Expand-Archive -Path $zipPath -DestinationPath $INSTALL_DIR -Force
-Remove-Item $zipPath -Force
+# Download and extract Nomad (skip if already installed at the correct version)
+$nomadPath = "$INSTALL_DIR\nomad.exe"
+$needsInstall = $true
+if (Test-Path $nomadPath) {
+  $currentVersion = (& $nomadPath version 2>&1) -replace '^Nomad v','' -replace '\s.*',''
+  if ($currentVersion -eq $NOMAD_VERSION) { $needsInstall = $false }
+}
+if ($needsInstall) {
+  Stop-Service -Name "Nomad" -Force -ErrorAction SilentlyContinue
+  Start-Sleep -Seconds 2
+  $zipPath = "$env:TEMP\nomad.zip"
+  Invoke-WebRequest -Uri $NOMAD_URL -OutFile $zipPath -UseBasicParsing
+  Expand-Archive -Path $zipPath -DestinationPath $INSTALL_DIR -Force
+  Remove-Item $zipPath -Force
+}
 
 # Add to PATH
-$nomadPath = "$INSTALL_DIR\nomad.exe"
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";$INSTALL_DIR", [EnvironmentVariableTarget]::Machine)
 $env:Path += ";$INSTALL_DIR"
 
@@ -28,6 +37,32 @@ $env:Path += ";$INSTALL_DIR"
 @'
 ${nomad_client_config}
 '@ | Out-File -FilePath $CONFIG_FILE -Encoding ASCII
+
+$JAVA_DIR = "C:\Java"
+if (-not (Test-Path "$JAVA_DIR\bin\java.exe")) {
+  New-Item -ItemType Directory -Force -Path $JAVA_DIR | Out-Null
+  $jdkUrl = "https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jre/hotspot/normal/eclipse"
+  $jdkZip = "$env:TEMP\java21.zip"
+  Invoke-WebRequest -Uri $jdkUrl -OutFile $jdkZip -UseBasicParsing
+  Expand-Archive -Path $jdkZip -DestinationPath "$env:TEMP\java21" -Force
+  # The archive extracts into a versioned subdirectory; move contents up
+  $extracted = Get-ChildItem "$env:TEMP\java21" | Select-Object -First 1
+  Copy-Item -Path "$($extracted.FullName)\*" -Destination $JAVA_DIR -Recurse -Force
+  Remove-Item $jdkZip -Force
+  Remove-Item "$env:TEMP\java21" -Recurse -Force
+  [Environment]::SetEnvironmentVariable("Path", $env:Path + ";$JAVA_DIR\bin", [EnvironmentVariableTarget]::Machine)
+  $env:Path += ";$JAVA_DIR\bin"
+}
+
+# Install Visual C++ Redistributable (required by Minecraft Bedrock and other native workloads)
+$vcInstalled = Test-Path "HKLM:\SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64"
+if (-not $vcInstalled) {
+  $vcUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+  $vcExe = "$env:TEMP\vc_redist.x64.exe"
+  Invoke-WebRequest -Uri $vcUrl -OutFile $vcExe -UseBasicParsing
+  Start-Process -FilePath $vcExe -ArgumentList "/install", "/quiet", "/norestart" -Wait
+  Remove-Item $vcExe -Force
+}
 
 # Open Windows Firewall for Nomad ports (HTTP API, RPC, Serf)
 New-NetFirewallRule -DisplayName "Nomad HTTP" -Direction Inbound -LocalPort 4646 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
