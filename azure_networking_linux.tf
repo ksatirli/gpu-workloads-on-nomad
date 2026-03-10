@@ -144,6 +144,21 @@ resource "azurerm_network_security_rule" "ingress_from_internet" {
   destination_port_ranges     = var.azurerm_ingress_ports
 }
 
+# Allow inbound UDP traffic (Minecraft Bedrock)
+resource "azurerm_network_security_rule" "ingress_udp_from_internet" {
+  access                      = "Allow"
+  direction                   = "Inbound"
+  name                        = "AllowUDPIngressFromInternet"
+  network_security_group_name = azurerm_network_security_group.vmss.name
+  priority                    = 125
+  protocol                    = "Udp"
+  resource_group_name         = azurerm_resource_group.main.name
+  source_address_prefixes     = local.ingress_source_addresses
+  source_port_range           = "*"
+  destination_address_prefix  = "*"
+  destination_port_ranges     = ["19132"]
+}
+
 # Allow Azure Load Balancer health probes (required for LB to mark backends healthy)
 resource "azurerm_network_security_rule" "lb_health_probes" {
   access                      = "Allow"
