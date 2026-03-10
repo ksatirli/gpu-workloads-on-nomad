@@ -1,3 +1,10 @@
+variable "rcon_password" {
+  type        = string
+  default     = "nomad-minecraft"
+  description = "RCON password for remote console access to the Minecraft server."
+}
+
+# Minecraft Java Edition Server (containerized)
 job "minecraft-java" {
   datacenters = ["dc1"]
   type        = "service"
@@ -56,7 +63,7 @@ job "minecraft-java" {
         EULA              = "TRUE"
         SERVER_PORT       = "${NOMAD_PORT_game}"
         RCON_PORT         = "${NOMAD_PORT_rcon}"
-        RCON_PASSWORD     = "nomad-minecraft"
+        RCON_PASSWORD     = var.rcon_password
         MOTD              = "Nomad GPU Workloads - Java Edition"
         MAX_PLAYERS       = "20"
         DIFFICULTY        = "normal"

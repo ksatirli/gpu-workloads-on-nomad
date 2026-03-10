@@ -99,7 +99,7 @@ job "minecraft-bedrock" {
           max-players=20
           online-mode=true
           server-port={{ env "NOMAD_PORT_ipv4" }}
-          server-portv6={{ env "NOMAD_PORT_ipv46" }}
+          server-portv6={{ env "NOMAD_PORT_ipv6" }}
           view-distance=10
           level-name=Bedrock Level
           "@
@@ -107,7 +107,7 @@ job "minecraft-bedrock" {
 
           # Open firewall for UDP (Bedrock uses UDP for game traffic)
           New-NetFirewallRule -DisplayName "Minecraft Bedrock UDP" -Direction Inbound -LocalPort {{ env "NOMAD_PORT_ipv4" }} -Protocol UDP -Action Allow -ErrorAction SilentlyContinue
-          New-NetFirewallRule -DisplayName "Minecraft Bedrock UDP6" -Direction Inbound -LocalPort {{ env "NOMAD_PORT_ipv46" }} -Protocol UDP -Action Allow -ErrorAction SilentlyContinue
+          New-NetFirewallRule -DisplayName "Minecraft Bedrock UDP6" -Direction Inbound -LocalPort {{ env "NOMAD_PORT_ipv6" }} -Protocol UDP -Action Allow -ErrorAction SilentlyContinue
 
           Write-Output "Setup complete"
         EOT
