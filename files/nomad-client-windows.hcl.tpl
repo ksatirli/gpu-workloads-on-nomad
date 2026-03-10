@@ -38,3 +38,9 @@ telemetry {
   publish_node_metrics       = true
   prometheus_metrics         = true
 }
+
+plugin "raw_exec" {
+  config {
+    enabled = true
+  }
+}
