@@ -53,7 +53,7 @@ job "ollama" {
       driver = "podman"
 
       config {
-        image              = "docker.io/ollama/ollama:latest"
+        image              = "docker.io/ollama/ollama:0.17.7"
         image_pull_timeout = "10m"
         ports              = ["http"]
       }

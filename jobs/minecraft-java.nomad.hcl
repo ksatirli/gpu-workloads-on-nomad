@@ -54,7 +54,7 @@ job "minecraft-java" {
       driver = "podman"
 
       config {
-        image              = "docker.io/itzg/minecraft-server:latest"
+        image              = "docker.io/itzg/minecraft-server:2026.1.3"
         image_pull_timeout = "10m"
         ports              = ["game", "rcon"]
       }

@@ -72,7 +72,7 @@ job "docling" {
       driver = "podman"
 
       config {
-        image              = "quay.io/docling-project/docling-serve:latest"
+        image              = "quay.io/docling-project/docling-serve:1.14.3"
         image_pull_timeout = "15m"
         ports              = ["http"]
 

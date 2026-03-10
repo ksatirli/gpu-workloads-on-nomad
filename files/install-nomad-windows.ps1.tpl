@@ -39,11 +39,18 @@ ${nomad_client_config}
 '@ | Out-File -FilePath $CONFIG_FILE -Encoding ASCII
 
 $JAVA_DIR = "C:\Java"
+$JAVA_VERSION = "21.0.10+7"
+$JAVA_SHA256 = "a6ac6789e51a2c245f41430c42e72b39ec706a449812fc5e4cbfc55ceed1e5ae"
 if (-not (Test-Path "$JAVA_DIR\bin\java.exe")) {
   New-Item -ItemType Directory -Force -Path $JAVA_DIR | Out-Null
-  $jdkUrl = "https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jre/hotspot/normal/eclipse"
+  $jdkUrl = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jre_x64_windows_hotspot_21.0.10_7.zip"
   $jdkZip = "$env:TEMP\java21.zip"
   Invoke-WebRequest -Uri $jdkUrl -OutFile $jdkZip -UseBasicParsing
+  $fileHash = (Get-FileHash -Path $jdkZip -Algorithm SHA256).Hash
+  if ($fileHash -ne $JAVA_SHA256) {
+    Remove-Item $jdkZip -Force
+    throw "Java JRE checksum mismatch! Expected: $JAVA_SHA256 Got: $fileHash"
+  }
   Expand-Archive -Path $jdkZip -DestinationPath "$env:TEMP\java21" -Force
   # The archive extracts into a versioned subdirectory; move contents up
   $extracted = Get-ChildItem "$env:TEMP\java21" | Select-Object -First 1
