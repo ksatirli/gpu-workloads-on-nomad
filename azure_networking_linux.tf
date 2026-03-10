@@ -129,6 +129,37 @@ resource "azurerm_lb_rule" "nomad_api" {
   protocol                       = "Tcp"
 }
 
+# Minecraft Java Edition (TCP 25565) - runs on Linux VMSS
+resource "azurerm_lb_probe" "minecraft_java" {
+  loadbalancer_id = azurerm_lb.main.id
+  name            = "minecraft-java-25565"
+  port            = 25565
+  protocol        = "Tcp"
+}
+
+resource "azurerm_lb_rule" "minecraft_java" {
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
+  backend_port                   = 25565
+  frontend_ip_configuration_name = "public"
+  frontend_port                  = 25565
+  loadbalancer_id                = azurerm_lb.main.id
+  name                           = "minecraft-java"
+  probe_id                       = azurerm_lb_probe.minecraft_java.id
+  protocol                       = "Tcp"
+}
+
+resource "azurerm_lb_rule" "minecraft_bedrock" {
+  count = var.azurerm_windows_instance_count > 0 ? 1 : 0
+
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.windows[0].id]
+  backend_port                   = 19132
+  frontend_ip_configuration_name = "public"
+  frontend_port                  = 19132
+  loadbalancer_id                = azurerm_lb.main.id
+  name                           = "minecraft-bedrock"
+  protocol                       = "Udp"
+}
+
 # Allow inbound traffic from configured source addresses
 resource "azurerm_network_security_rule" "ingress_from_internet" {
   access                      = "Allow"

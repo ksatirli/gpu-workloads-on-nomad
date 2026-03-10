@@ -22,6 +22,17 @@ output "load_balancer_public_ip" {
   value       = azurerm_public_ip.lb.ip_address
 }
 
+output "windows_admin_password" {
+  description = "Admin password for Windows VM instances"
+  value       = var.azurerm_windows_instance_count > 0 ? random_password.windows_admin[0].result : null
+  sensitive   = true
+}
+
+output "internal_load_balancer_ip" {
+  description = "Private IP of the internal load balancer used for Nomad server discovery"
+  value       = var.azurerm_windows_instance_count > 0 ? azurerm_lb.internal[0].frontend_ip_configuration[0].private_ip_address : null
+}
+
 output "load_balancer_endpoints" {
   description = "Remote access URLs for Traefik and Nomad API"
   value = {
