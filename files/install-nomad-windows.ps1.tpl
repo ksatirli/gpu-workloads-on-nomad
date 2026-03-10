@@ -39,11 +39,11 @@ ${nomad_client_config}
 '@ | Out-File -FilePath $CONFIG_FILE -Encoding ASCII
 
 $JAVA_DIR = "C:\Java"
-$JAVA_VERSION = "21.0.10+7"
-$JAVA_SHA256 = "a6ac6789e51a2c245f41430c42e72b39ec706a449812fc5e4cbfc55ceed1e5ae"
+$JAVA_VERSION = "${java_jre.version}"
+$JAVA_SHA256 = "${java_jre.sha256}"
 if (-not (Test-Path "$JAVA_DIR\bin\java.exe")) {
   New-Item -ItemType Directory -Force -Path $JAVA_DIR | Out-Null
-  $jdkUrl = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jre_x64_windows_hotspot_21.0.10_7.zip"
+  $jdkUrl = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-${replace(java_jre.version, "+", "%2B")}/${java_jre.filename}"
   $jdkZip = "$env:TEMP\java21.zip"
   Invoke-WebRequest -Uri $jdkUrl -OutFile $jdkZip -UseBasicParsing
   $fileHash = (Get-FileHash -Path $jdkZip -Algorithm SHA256).Hash
