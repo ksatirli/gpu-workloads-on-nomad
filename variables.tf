@@ -215,36 +215,6 @@ variable "azurerm_vmss_linux_source_image_reference" {
   })
 }
 
-variable "ibm_resource_group_name" {
-  default     = "nomad-gpu-workloads"
-  description = "The name of the resource group."
-  type        = string
-}
-
-variable "ibmcloud_api_key" {
-  # see https://registry.terraform.io/providers/IBM-Cloud/ibm/latest/docs#region-2
-  default     = "us-south" # North America, Dallas
-  description = "The IBM Cloud platform API key."
-  type        = string
-}
-
-variable "ibmcloud_region" {
-  # see https://registry.terraform.io/providers/IBM-Cloud/ibm/latest/docs#region-2
-  default     = "us-south" # North America, Dallas
-  description = "The IBM Cloud region."
-  type        = string
-}
-
-variable "ibmcloud_timeout" {
-  # see https://registry.terraform.io/providers/IBM-Cloud/ibm/latest/docs#ibmcloud_timeout-2
-  default     = 60
-  description = "The timeout, expressed in seconds, for interacting with IBM Cloud APIs."
-  type        = number
-}
-
-variable "ibmcloud_visibility" {
-  # see https://registry.terraform.io/providers/IBM-Cloud/ibm/latest/docs#visibility-2
-  default     = "public"
   description = "The visibility to IBM Cloud endpoint."
   type        = string
 }

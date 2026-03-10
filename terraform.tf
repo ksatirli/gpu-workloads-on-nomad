@@ -25,12 +25,6 @@ terraform {
       version = ">= 2.3.0, < 3.0.0"
     }
 
-    # see https://registry.terraform.io/providers/IBM-Cloud/ibm/1.88.0/docs
-    ibm = {
-      source  = "IBM-Cloud/ibm"
-      version = ">= 1.88.0, < 2.0.0"
-    }
-
     # see https://registry.terraform.io/providers/hashicorp/http/latest/docs
     http = {
       source  = "hashicorp/http"
