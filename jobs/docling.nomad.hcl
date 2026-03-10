@@ -1,7 +1,7 @@
 variable "image_version" {
   type        = string
   default     = "1.14.3"
-  description = "Container image tag for docling-serve"
+  description = "Container image version for docling-serve"
 }
 
 # Docling - AI-powered document conversion API

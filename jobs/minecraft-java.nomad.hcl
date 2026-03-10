@@ -7,7 +7,7 @@ variable "rcon_password" {
 variable "image_version" {
   type        = string
   default     = "2026.1.3"
-  description = "Container image tag for itzg/minecraft-server"
+  description = "Container image version for itzg/minecraft-server"
 }
 
 # Minecraft Java Edition Server (containerized)

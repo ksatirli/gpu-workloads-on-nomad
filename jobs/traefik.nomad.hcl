@@ -8,7 +8,7 @@ variable "nomad_token" {
 variable "image_version" {
   type        = string
   default     = "v3"
-  description = "Container image tag for traefik"
+  description = "Container image version for traefik"
 }
 
 job "traefik" {

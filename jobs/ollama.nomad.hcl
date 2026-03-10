@@ -1,7 +1,7 @@
 variable "image_version" {
   type        = string
   default     = "0.17.7"
-  description = "Container image tag for ollama"
+  description = "Container image version for ollama"
 }
 
 # Ollama - local LLM inference server
