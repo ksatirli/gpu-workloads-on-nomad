@@ -129,6 +129,21 @@ resource "azurerm_lb_rule" "nomad_api" {
   protocol                       = "Tcp"
 }
 
+resource "azurerm_lb_backend_address_pool" "windows" {
+  count = var.azurerm_windows_instance_count > 0 ? 1 : 0
+
+  loadbalancer_id = azurerm_lb.main.id
+  name            = "windows-backend"
+}
+
+resource "azurerm_network_interface_backend_address_pool_association" "windows" {
+  count = var.azurerm_windows_instance_count > 0 ? 1 : 0
+
+  backend_address_pool_id = azurerm_lb_backend_address_pool.windows[0].id
+  ip_configuration_name   = "internal"
+  network_interface_id    = azurerm_network_interface.windows[0].id
+}
+
 # Minecraft Java Edition (TCP 25565) - runs on Linux VMSS
 resource "azurerm_lb_probe" "minecraft_java" {
   loadbalancer_id = azurerm_lb.main.id
