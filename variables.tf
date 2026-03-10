@@ -122,7 +122,7 @@ variable "azurerm_ingress_source_addresses" {
 }
 
 variable "azurerm_ingress_ports" {
-  default     = ["80", "443", "4646", "8080"]
+  default     = ["80", "443", "4646", "8080", "25565", "19132"]
   description = "Destination ports opened in the VMSS NSG for external ingress."
   type        = list(string)
 }
@@ -213,10 +213,6 @@ variable "azurerm_vmss_linux_source_image_reference" {
     sku       = string
     version   = string
   })
-}
-
-  description = "The visibility to IBM Cloud endpoint."
-  type        = string
 }
 
 variable "project_identifier" {
