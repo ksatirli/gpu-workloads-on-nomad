@@ -1,6 +1,6 @@
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account
 resource "azurerm_storage_account" "boot_logs" {
-  account_replication_type    = "LRS"
+  account_replication_type   = "LRS"
   account_tier               = "Standard"
   https_traffic_only_enabled = true
   location                   = azurerm_resource_group.main.location

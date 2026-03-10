@@ -178,6 +178,20 @@ variable "azurerm_windows_source_image_reference" {
   })
 }
 
+variable "java_jre" {
+  default = {
+    version  = "21.0.10+7"
+    sha256   = "a6ac6789e51a2c245f41430c42e72b39ec706a449812fc5e4cbfc55ceed1e5ae"
+    filename = "OpenJDK21U-jre_x64_windows_hotspot_21.0.10_7.zip"
+  }
+  description = "Adoptium Temurin JRE version, SHA256 checksum, and archive filename for Windows x64."
+  type = object({
+    version  = string
+    sha256   = string
+    filename = string
+  })
+}
+
 variable "azurerm_vmss_sku" {
   # only N-Series VMs support GPU workloads
   default     = "Standard_B2s"
