@@ -1,3 +1,9 @@
+variable "server_version" {
+  type        = string
+  default     = "1.21.51.02"
+  description = "Minecraft Bedrock Dedicated Server version"
+}
+
 job "minecraft-bedrock" {
   datacenters = ["dc1"]
   type        = "service"
@@ -78,7 +84,7 @@ job "minecraft-bedrock" {
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             $zipPath = "$env:TEMP\bedrock-server.zip"
             # Bedrock server download requires accepting the EULA via user-agent header
-            $url = "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.51.02.zip"
+            $url = "https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-${var.server_version}.zip"
             $headers = @{ "User-Agent" = "Mozilla/5.0" }
             try {
               Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing -Headers $headers

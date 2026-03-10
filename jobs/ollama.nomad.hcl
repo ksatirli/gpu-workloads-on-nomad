@@ -1,3 +1,9 @@
+variable "image_version" {
+  type        = string
+  default     = "0.17.7"
+  description = "Container image tag for ollama"
+}
+
 # Ollama - local LLM inference server
 # see https://github.com/ollama/ollama
 job "ollama" {
@@ -53,7 +59,7 @@ job "ollama" {
       driver = "podman"
 
       config {
-        image              = "docker.io/ollama/ollama:0.17.7"
+        image              = "docker.io/ollama/ollama:${var.image_version}"
         image_pull_timeout = "10m"
         ports              = ["http"]
       }

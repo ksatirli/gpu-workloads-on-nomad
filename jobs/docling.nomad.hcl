@@ -1,3 +1,9 @@
+variable "image_version" {
+  type        = string
+  default     = "1.14.3"
+  description = "Container image tag for docling-serve"
+}
+
 # Docling - AI-powered document conversion API
 # see https://github.com/docling-project/docling-serve
 job "docling" {
@@ -72,7 +78,7 @@ job "docling" {
       driver = "podman"
 
       config {
-        image              = "quay.io/docling-project/docling-serve:1.14.3"
+        image              = "quay.io/docling-project/docling-serve:${var.image_version}"
         image_pull_timeout = "15m"
         ports              = ["http"]
 

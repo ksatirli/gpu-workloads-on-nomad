@@ -4,6 +4,12 @@ variable "rcon_password" {
   description = "RCON password for remote console access to the Minecraft server."
 }
 
+variable "image_version" {
+  type        = string
+  default     = "2026.1.3"
+  description = "Container image tag for itzg/minecraft-server"
+}
+
 # Minecraft Java Edition Server (containerized)
 job "minecraft-java" {
   datacenters = ["dc1"]
@@ -54,7 +60,7 @@ job "minecraft-java" {
       driver = "podman"
 
       config {
-        image              = "docker.io/itzg/minecraft-server:2026.1.3"
+        image              = "docker.io/itzg/minecraft-server:${var.image_version}"
         image_pull_timeout = "10m"
         ports              = ["game", "rcon"]
       }

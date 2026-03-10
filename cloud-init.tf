@@ -42,6 +42,7 @@ locals {
   nomad_install_script = var.azurerm_windows_instance_count > 0 ? templatefile("${path.module}/files/install-nomad-windows.ps1.tpl", {
     nomad_client_config = local.nomad_client_windows_config_raw
     nomad_version       = var.nomad_version_windows
+    java_jre            = var.java_jre
   }) : ""
 }
 

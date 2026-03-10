@@ -5,6 +5,12 @@ variable "nomad_token" {
   description = "Nomad ACL token for service catalog discovery"
 }
 
+variable "image_version" {
+  type        = string
+  default     = "v3"
+  description = "Container image tag for traefik"
+}
+
 job "traefik" {
   datacenters = ["dc1"]
   type        = "system"
@@ -42,7 +48,7 @@ job "traefik" {
       driver = "podman"
 
       config {
-        image = "docker.io/library/traefik:v3"
+        image = "docker.io/library/traefik:${var.image_version}"
         ports = ["http", "api"]
 
         args = [
