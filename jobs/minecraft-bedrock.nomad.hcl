@@ -23,6 +23,13 @@ job "minecraft-bedrock" {
       name     = "minecraft-bedrock"
       port     = "ipv4"
       provider = "nomad"
+
+      check {
+        type     = "tcp"
+        port     = "ipv4"
+        interval = "30s"
+        timeout  = "5s"
+      }
     }
 
     update {

@@ -60,13 +60,6 @@ resource "azurerm_lb_probe" "http" {
   protocol        = "Tcp"
 }
 
-resource "azurerm_lb_probe" "https" {
-  loadbalancer_id = azurerm_lb.main.id
-  name            = "https-443"
-  port            = 443
-  protocol        = "Tcp"
-}
-
 resource "azurerm_lb_probe" "nomad" {
   loadbalancer_id = azurerm_lb.main.id
   name            = "nomad-4646"
@@ -75,7 +68,7 @@ resource "azurerm_lb_probe" "nomad" {
   request_path    = "/v1/agent/health"
 }
 
-# Load balancing rules - HTTP, HTTPS, Nomad API
+# Load balancing rules - HTTP, Nomad API
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb_rule
 resource "azurerm_lb_rule" "http" {
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
@@ -85,17 +78,6 @@ resource "azurerm_lb_rule" "http" {
   loadbalancer_id                = azurerm_lb.main.id
   name                           = "http"
   probe_id                       = azurerm_lb_probe.http.id
-  protocol                       = "Tcp"
-}
-
-resource "azurerm_lb_rule" "https" {
-  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
-  backend_port                   = 443
-  frontend_ip_configuration_name = "public"
-  frontend_port                  = 443
-  loadbalancer_id                = azurerm_lb.main.id
-  name                           = "https"
-  probe_id                       = azurerm_lb_probe.https.id
   protocol                       = "Tcp"
 }
 

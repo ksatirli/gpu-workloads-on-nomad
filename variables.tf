@@ -21,7 +21,7 @@ variable "azurerm_vnet_address_space" {
 
 variable "azurerm_vmss_subnet_address_prefix" {
   default     = "10.0.1.0/24" # /24 nets approx 250 usable IPs
-  description = " The address prefixes to use for the subnet."
+  description = "The address prefixes to use for the subnet."
   type        = string
 }
 
@@ -122,7 +122,7 @@ variable "azurerm_ingress_source_addresses" {
 }
 
 variable "azurerm_ingress_ports" {
-  default     = ["80", "443", "4646", "8080", "25565", "19132"]
+  default     = ["80", "4646", "8080", "25565", "19132"]
   description = "Destination ports opened in the VMSS NSG for external ingress."
   type        = list(string)
 }
