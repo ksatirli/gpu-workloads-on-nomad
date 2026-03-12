@@ -11,15 +11,21 @@ job "iis" {
     count = 1
 
     network {
-      port "http" {
-        static = 8080
-      }
+      port "http" {}
     }
 
     service {
       name     = "iis"
       port     = "http"
       provider = "nomad"
+
+      tags = [
+        "traefik.enable=true",
+        "traefik.http.routers.iis.rule=PathPrefix(`/iis`)",
+        "traefik.http.routers.iis.entrypoints=web",
+        "traefik.http.middlewares.iis-strip.stripprefix.prefixes=/iis",
+        "traefik.http.routers.iis.middlewares=iis-strip",
+      ]
 
       check {
         type     = "http"
@@ -41,61 +47,29 @@ job "iis" {
       mode     = "fail"
     }
 
-    task "setup" {
-      driver    = "raw_exec"
-      lifecycle {
-        hook    = "prestart"
-        sidecar = false
-      }
-
-      config {
-        command = "powershell.exe"
-        args    = ["-ExecutionPolicy", "Bypass", "-File", "${NOMAD_TASK_DIR}/setup.ps1"]
-      }
-
-      template {
-        data        = <<-EOT
-          # Install IIS if not present
-          if (-not (Get-WindowsFeature Web-Server).Installed) {
-            Install-WindowsFeature -Name Web-Server -IncludeManagementTools
-          }
-          # Open firewall for the allocated port
-          New-NetFirewallRule -DisplayName "Nomad IIS" -Direction Inbound -LocalPort {{ env "NOMAD_PORT_http" }} -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
-        EOT
-        destination = "local/setup.ps1"
-      }
-
-      resources {
-        cpu    = 500
-        memory = 512
-      }
-    }
-
     task "iis" {
-      driver = "raw_exec"
+      driver = "iis"
 
       config {
-        command = "powershell.exe"
-        args    = ["-ExecutionPolicy", "Bypass", "-File", "${NOMAD_TASK_DIR}/run.ps1"]
+        application {
+          path = "local"
+        }
+
+        binding {
+          type = "http"
+          port = "http"
+        }
       }
 
       template {
         data        = <<-EOT
-          Import-Module WebAdministration
-
-          Remove-WebBinding -Name 'Default Web Site' -BindingInformation '*:80:' -ErrorAction SilentlyContinue
-          New-WebBinding -Name 'Default Web Site' -Protocol http -Port {{ env "NOMAD_PORT_http" }} -IPAddress '*'
-
-          $html = "<html><body><h1>Nomad on Windows</h1><p>Host: $env:COMPUTERNAME</p><p>Alloc: $env:NOMAD_ALLOC_ID</p></body></html>"
-          Set-Content -Path C:\inetpub\wwwroot\index.html -Value $html -Encoding ASCII
-
-          # Ensure IIS is running
-          Start-Service W3SVC -ErrorAction SilentlyContinue
-
-          # Block to keep the task alive
-          while ($true) { Start-Sleep -Seconds 60 }
+          <html><body>
+          <h1>Nomad on Windows</h1>
+          <p>Host: {{ env "attr.unique.hostname" }}</p>
+          <p>Alloc: {{ env "NOMAD_ALLOC_ID" }}</p>
+          </body></html>
         EOT
-        destination = "local/run.ps1"
+        destination = "local/index.html"
       }
 
       resources {

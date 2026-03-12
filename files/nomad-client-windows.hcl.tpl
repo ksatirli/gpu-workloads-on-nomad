@@ -1,5 +1,6 @@
 datacenter = "${datacenter}"
 data_dir   = "C:\\Nomad\\data"
+plugin_dir = "C:\\Nomad\\plugins"
 
 bind_addr = "0.0.0.0"
 addresses {
@@ -40,6 +41,12 @@ telemetry {
 }
 
 plugin "raw_exec" {
+  config {
+    enabled = true
+  }
+}
+
+plugin "nomad_iis" {
   config {
     enabled = true
   }

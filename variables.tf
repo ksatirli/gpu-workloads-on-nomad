@@ -178,6 +178,12 @@ variable "azurerm_windows_source_image_reference" {
   })
 }
 
+variable "nomad_iis_version" {
+  default     = "0.19.0"
+  description = "Version of the nomad-iis task driver plugin for Windows clients."
+  type        = string
+}
+
 variable "java_jre" {
   default = {
     version  = "21.0.10+7"

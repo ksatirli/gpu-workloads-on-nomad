@@ -71,11 +71,28 @@ if (-not $vcInstalled) {
   Remove-Item $vcExe -Force
 }
 
+# Install nomad-iis task driver plugin
+$PLUGIN_DIR = "C:\Nomad\plugins"
+$NOMAD_IIS_VERSION = "${nomad_iis_version}"
+New-Item -ItemType Directory -Force -Path $PLUGIN_DIR | Out-Null
+if (-not (Test-Path "$PLUGIN_DIR\nomad_iis.exe")) {
+  $iisZip = "$env:TEMP\nomad_iis.zip"
+  Invoke-WebRequest -Uri "https://github.com/sevensolutions/nomad-iis/releases/download/v$NOMAD_IIS_VERSION/nomad_iis.zip" -OutFile $iisZip -UseBasicParsing
+  Expand-Archive -Path $iisZip -DestinationPath $PLUGIN_DIR -Force
+  Remove-Item $iisZip -Force
+}
+
+# Install IIS Windows feature (required by nomad-iis driver)
+if (-not (Get-WindowsFeature Web-Server).Installed) {
+  Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+}
+
 # Open Windows Firewall for Nomad ports (HTTP API, RPC, Serf)
 New-NetFirewallRule -DisplayName "Nomad HTTP" -Direction Inbound -LocalPort 4646 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
 New-NetFirewallRule -DisplayName "Nomad RPC" -Direction Inbound -LocalPort 4647 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
 New-NetFirewallRule -DisplayName "Nomad Serf TCP" -Direction Inbound -LocalPort 4648 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
 New-NetFirewallRule -DisplayName "Nomad Serf UDP" -Direction Inbound -LocalPort 4648 -Protocol UDP -Action Allow -ErrorAction SilentlyContinue
+New-NetFirewallRule -DisplayName "Nomad Dynamic Ports" -Direction Inbound -LocalPort 20000-32000 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
 
 # Register Nomad as Windows service using sc.exe (more reliable than nomad windows service install)
 # Remove existing service if present (e.g. from failed previous run)
