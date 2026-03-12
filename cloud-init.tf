@@ -31,6 +31,17 @@ locals {
     nomad_autoscaler_version    = var.nomad_plugin_versions.autoscaler
   })
 
+  # GPU VMSS cloud-init: all instances are clients (nomad_server_count = 0)
+  cloud_init_gpu_content = templatefile("${path.module}/files/cloud-init-linux-vmss.yaml.tpl", {
+    nomad_client_config_b64     = base64encode(local.nomad_client_config_raw)
+    nomad_server_config_b64     = base64encode(local.nomad_server_config_raw)
+    nomad_server_count          = 0
+    vmss_instance_count         = var.azurerm_vmss_gpu_instance_count
+    nomad_device_nvidia_version = var.nomad_plugin_versions.device_nvidia
+    nomad_driver_exec2_version  = var.nomad_plugin_versions.driver_exec2
+    nomad_autoscaler_version    = var.nomad_plugin_versions.autoscaler
+  })
+
   # Windows Nomad client config - joins via internal LB
   nomad_client_windows_config_raw = var.azurerm_windows_instance_count > 0 ? templatefile("${path.module}/files/nomad-client-windows.hcl.tpl", {
     datacenter           = var.nomad_datacenter
@@ -61,5 +72,15 @@ data "cloudinit_config" "linux_vmss" {
   part {
     content_type = "text/cloud-config"
     content      = local.cloud_init_linux_content
+  }
+}
+
+data "cloudinit_config" "gpu_vmss" {
+  gzip          = true
+  base64_encode = true
+
+  part {
+    content_type = "text/cloud-config"
+    content      = local.cloud_init_gpu_content
   }
 }
