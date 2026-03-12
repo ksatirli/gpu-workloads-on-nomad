@@ -90,13 +90,9 @@ job "docling" {
         ]
       }
 
-      # GPU access via NVIDIA CDI
-      # When running on N-series VMs with GPU drivers installed,
-      # uncomment the device block below to request GPU resources.
-      #
-      # device "nvidia/gpu" {
-      #   count = 1
-      # }
+      device "nvidia/gpu" {
+        count = 1
+      }
 
       resources {
         cpu    = 1000

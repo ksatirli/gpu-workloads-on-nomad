@@ -207,8 +207,26 @@ variable "azurerm_vmss_sku" {
 
 variable "azurerm_vmss_install_nvidia_gpu_extension" {
   default     = false
-  description = "Install NVIDIA GPU driver extension on VMSS instances."
+  description = "Install NVIDIA GPU driver extension on the main (non-GPU) VMSS instances."
   type        = bool
+}
+
+variable "azurerm_vmss_gpu_enabled" {
+  default     = true
+  description = "Whether to create a dedicated GPU VMSS alongside the main VMSS."
+  type        = bool
+}
+
+variable "azurerm_vmss_gpu_sku" {
+  default     = "Standard_NC4as_T4_v3"
+  description = "VM size for the GPU scale set instances (must be N-series for GPU support)."
+  type        = string
+}
+
+variable "azurerm_vmss_gpu_instance_count" {
+  default     = 1
+  description = "Number of GPU VM instances in the GPU scale set."
+  type        = number
 }
 
 variable "azurerm_vmss_nvidia_gpu_extension_version" {

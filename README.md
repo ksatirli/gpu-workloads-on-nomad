@@ -16,3 +16,12 @@ HashiCorp Nomad cluster on Azure with GPU support, mixed Linux/Windows workloads
 | Minecraft Bedrock | `<public-ip>:19132` (UDP) |
 
 Run `terraform output load_balancer_endpoints` to get the actual URLs.
+
+## GPU Quota
+
+### Check current quota
+
+```bash
+az vm list-usage --location <region> -o table | grep "NCASv3_T4"
+```
+

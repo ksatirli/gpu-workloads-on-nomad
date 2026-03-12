@@ -73,6 +73,25 @@ resource "azurerm_monitor_data_collection_rule_association" "vmss" {
   data_collection_rule_id = azurerm_monitor_data_collection_rule.main.id
 }
 
+resource "azurerm_virtual_machine_scale_set_extension" "azure_monitor_gpu" {
+  count = var.azurerm_vmss_gpu_enabled ? 1 : 0
+
+  name                         = "AzureMonitorLinuxAgent"
+  publisher                    = "Microsoft.Azure.Monitor"
+  type                         = "AzureMonitorLinuxAgent"
+  type_handler_version         = "1.33"
+  auto_upgrade_minor_version   = true
+  virtual_machine_scale_set_id = azurerm_linux_virtual_machine_scale_set.gpu[0].id
+}
+
+resource "azurerm_monitor_data_collection_rule_association" "gpu_vmss" {
+  count = var.azurerm_vmss_gpu_enabled ? 1 : 0
+
+  name                    = "${var.project_identifier}-gpu-vmss-dcr"
+  target_resource_id      = azurerm_linux_virtual_machine_scale_set.gpu[0].id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.main.id
+}
+
 resource "azurerm_monitor_data_collection_rule_association" "windows" {
   count = var.azurerm_windows_instance_count > 0 ? 1 : 0
 
