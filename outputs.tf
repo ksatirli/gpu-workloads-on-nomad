@@ -34,9 +34,11 @@ output "internal_load_balancer_ip" {
 }
 
 output "load_balancer_endpoints" {
-  description = "Remote access URLs for Traefik and Nomad API"
+  description = "Remote access URLs for services behind the load balancer"
   value = {
-    http      = "http://${azurerm_public_ip.lb.ip_address}"
-    nomad_api = "http://${azurerm_public_ip.lb.ip_address}:4646"
+    nomad_api         = "http://${azurerm_public_ip.lb.ip_address}:4646"
+    traefik_dashboard = "http://${azurerm_public_ip.lb.ip_address}:8080"
+    traefik_http      = "http://${azurerm_public_ip.lb.ip_address}"
+    iis               = "http://${azurerm_public_ip.lb.ip_address}/iis"
   }
 }
