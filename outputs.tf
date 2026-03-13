@@ -16,6 +16,16 @@ output "ssh_via_bastion_list_instances" {
   value       = "az vmss list-instances -g ${azurerm_resource_group.main.name} --name ${azurerm_linux_virtual_machine_scale_set.main.name} -o table"
 }
 
+output "gpu_ssh_via_bastion_template" {
+  description = "SSH command template for GPU VMSS — replace <INSTANCE_ID> with actual ID from gpu_ssh_via_bastion_list_instances"
+  value       = var.azurerm_vmss_gpu_enabled ? "az network bastion ssh --name ${azurerm_bastion_host.main.name} --resource-group ${azurerm_resource_group.main.name} --target-resource-id /subscriptions/${var.azurerm_subscription_id}/resourceGroups/${azurerm_resource_group.main.name}/providers/Microsoft.Compute/virtualMachineScaleSets/${azurerm_linux_virtual_machine_scale_set.gpu[0].name}/virtualMachines/<INSTANCE_ID> --auth-type ssh-key --username ${var.azurerm_vmss_admin_username} --ssh-key ${abspath("${path.module}/dist/id_ed25519")}" : null
+}
+
+output "gpu_ssh_via_bastion_list_instances" {
+  description = "List actual GPU VMSS instance IDs for use with gpu_ssh_via_bastion_template"
+  value       = var.azurerm_vmss_gpu_enabled ? "az vmss list-instances -g ${azurerm_resource_group.main.name} --name ${azurerm_linux_virtual_machine_scale_set.gpu[0].name} -o table" : null
+}
+
 # Load balancer public IP for Traefik ingress and Nomad API remote access
 output "load_balancer_public_ip" {
   description = "Public IP of the load balancer for HTTP (80) and Nomad API (4646)"
