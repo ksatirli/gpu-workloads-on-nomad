@@ -122,8 +122,8 @@ variable "azurerm_ingress_source_addresses" {
 }
 
 variable "azurerm_ingress_ports" {
-  default     = ["80", "4646", "8080", "25565", "19132"]
-  description = "Destination ports opened in the VMSS NSG for external ingress."
+  default     = ["80", "4646", "8080", "25565"]
+  description = "TCP destination ports opened in the VMSS NSG for external ingress. UDP ports (e.g. 19132 for Minecraft Bedrock) are handled by dedicated rules."
   type        = list(string)
 }
 
