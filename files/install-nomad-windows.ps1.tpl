@@ -74,21 +74,10 @@ if (-not $vcInstalled) {
 # Install nomad-iis task driver plugin
 $PLUGIN_DIR = "C:\Nomad\plugins"
 $NOMAD_IIS_VERSION = "${nomad_iis_version}"
-$NOMAD_IIS_SHA256 = "${nomad_iis_sha256}"
 New-Item -ItemType Directory -Force -Path $PLUGIN_DIR | Out-Null
 if (-not (Test-Path "$PLUGIN_DIR\nomad_iis.exe")) {
   $iisZip = "$env:TEMP\nomad_iis.zip"
   Invoke-WebRequest -Uri "https://github.com/sevensolutions/nomad-iis/releases/download/v$NOMAD_IIS_VERSION/nomad_iis.zip" -OutFile $iisZip -UseBasicParsing
-
-  # Verify SHA256 hash of downloaded nomad-iis plugin if an expected hash is provided
-  if ($NOMAD_IIS_SHA256 -and $NOMAD_IIS_SHA256.Trim() -ne "") {
-    $computedHash = (Get-FileHash -Path $iisZip -Algorithm SHA256).Hash.ToLowerInvariant()
-    $expectedHash = $NOMAD_IIS_SHA256.Trim().ToLowerInvariant()
-    if ($computedHash -ne $expectedHash) {
-      Remove-Item $iisZip -Force -ErrorAction SilentlyContinue
-      throw "SHA256 verification failed for nomad_iis.zip. Expected $expectedHash but got $computedHash."
-    }
-  }
 
   Expand-Archive -Path $iisZip -DestinationPath $PLUGIN_DIR -Force
   Remove-Item $iisZip -Force
