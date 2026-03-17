@@ -119,6 +119,11 @@ variable "azurerm_ingress_source_addresses" {
   default     = null
   description = "Source IP addresses (CIDR) allowed to reach ingress ports. Defaults to the current public IP of the Terraform runner if not set."
   type        = list(string)
+
+  validation {
+    condition     = var.azurerm_ingress_source_addresses == null || length(var.azurerm_ingress_source_addresses) > 0
+    error_message = "azurerm_ingress_source_addresses must be null or a non-empty list. Pass null (or omit) to auto-detect."
+  }
 }
 
 variable "azurerm_ingress_ports" {
@@ -134,12 +139,6 @@ variable "tags" {
   }
   description = "Tags applied to all Azure resources."
   type        = map(string)
-}
-
-variable "azurerm_vmss_windows_instance_count" {
-  default     = 0
-  description = "Number of Windows VM instances in the scale set."
-  type        = number
 }
 
 variable "azurerm_windows_instance_count" {
@@ -277,5 +276,5 @@ locals {
   project_identifier_clean = lower(replace(var.project_identifier, "-", ""))
 
   # Use provided source addresses, or fall back to the Terraform runner's public IP
-  ingress_source_addresses = coalesce(var.azurerm_ingress_source_addresses, ["${trimspace(data.http.my_ip.response_body)}/32"])
+  ingress_source_addresses = length(coalesce(var.azurerm_ingress_source_addresses, [])) > 0 ? var.azurerm_ingress_source_addresses : ["${trimspace(data.http.my_ip.response_body)}/32"]
 }
