@@ -76,22 +76,28 @@ runcmd:
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     mkdir -p /opt/nomad/data/plugins
     curl -fsSLo /tmp/nomad-device-nvidia.zip "https://releases.hashicorp.com/nomad-device-nvidia/${nomad_device_nvidia_version}/nomad-device-nvidia_${nomad_device_nvidia_version}_linux_$${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-device-nvidia_SHA256SUMS "https://releases.hashicorp.com/nomad-device-nvidia/${nomad_device_nvidia_version}/nomad-device-nvidia_${nomad_device_nvidia_version}_SHA256SUMS"
+    (cd /tmp && grep "nomad-device-nvidia_${nomad_device_nvidia_version}_linux_$${ARCH}.zip" nomad-device-nvidia_SHA256SUMS | sha256sum -c -)
     unzip -o /tmp/nomad-device-nvidia.zip -d /opt/nomad/data/plugins
     chmod +x /opt/nomad/data/plugins/nomad-device-nvidia
-    rm /tmp/nomad-device-nvidia.zip
+    rm /tmp/nomad-device-nvidia.zip /tmp/nomad-device-nvidia_SHA256SUMS
   - |
     set -e
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     curl -fsSLo /tmp/nomad-driver-exec2.zip "https://releases.hashicorp.com/nomad-driver-exec2/${nomad_driver_exec2_version}/nomad-driver-exec2_${nomad_driver_exec2_version}_linux_$${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-driver-exec2_SHA256SUMS "https://releases.hashicorp.com/nomad-driver-exec2/${nomad_driver_exec2_version}/nomad-driver-exec2_${nomad_driver_exec2_version}_SHA256SUMS"
+    (cd /tmp && grep "nomad-driver-exec2_${nomad_driver_exec2_version}_linux_$${ARCH}.zip" nomad-driver-exec2_SHA256SUMS | sha256sum -c -)
     unzip -o /tmp/nomad-driver-exec2.zip -d /opt/nomad/data/plugins
     chmod +x /opt/nomad/data/plugins/nomad-driver-exec2
-    rm /tmp/nomad-driver-exec2.zip
+    rm /tmp/nomad-driver-exec2.zip /tmp/nomad-driver-exec2_SHA256SUMS
   - |
     set -e
     ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
     curl -fsSLo /tmp/nomad-autoscaler.zip "https://releases.hashicorp.com/nomad-autoscaler/${nomad_autoscaler_version}/nomad-autoscaler_${nomad_autoscaler_version}_linux_$${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-autoscaler_SHA256SUMS "https://releases.hashicorp.com/nomad-autoscaler/${nomad_autoscaler_version}/nomad-autoscaler_${nomad_autoscaler_version}_SHA256SUMS"
+    (cd /tmp && grep "nomad-autoscaler_${nomad_autoscaler_version}_linux_$${ARCH}.zip" nomad-autoscaler_SHA256SUMS | sha256sum -c -)
     unzip -o /tmp/nomad-autoscaler.zip -d /usr/local/bin
     chmod +x /usr/local/bin/nomad-autoscaler
-    rm /tmp/nomad-autoscaler.zip
+    rm /tmp/nomad-autoscaler.zip /tmp/nomad-autoscaler_SHA256SUMS
   - systemctl enable nomad
   - systemctl start nomad
