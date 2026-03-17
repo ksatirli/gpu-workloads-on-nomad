@@ -59,14 +59,16 @@ job "traefik" {
           "--entrypoints.web.address=:${NOMAD_PORT_http}",
           "--providers.nomad=true",
           "--providers.nomad.endpoint.address=http://${NOMAD_IP_http}:4646",
-          "--providers.nomad.endpoint.token=${NOMAD_TOKEN}",
           "--providers.nomad.exposedByDefault=false",
         ]
       }
 
       # Scoped ACL token for reading Nomad service catalog
       template {
-        data        = "NOMAD_TOKEN={{ with nomadVar \"nomad/jobs/traefik\" }}{{ .nomad_token }}{{ end }}"
+        data        = <<EOF
+NOMAD_TOKEN={{ with nomadVar "nomad/jobs/traefik" }}{{ .nomad_token }}{{ end }}
+TRAEFIK_PROVIDERS_NOMAD_ENDPOINT_TOKEN={{ with nomadVar "nomad/jobs/traefik" }}{{ .nomad_token }}{{ end }}
+EOF
         destination = "secrets/nomad.env"
         env         = true
       }
