@@ -15,7 +15,7 @@ variable "azurerm_vnet_address_space" {
     "10.0.0.0/16"
   ]
 
-  description = "The address space that is used the virtual network."
+  description = "The address space that is used by the virtual network."
   type        = list(string)
 }
 

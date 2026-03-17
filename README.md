@@ -190,7 +190,7 @@ This repository provides a [Taskfile](./Taskfile.yml)-based workflow.
 | azurerm_vmss_sku | VM size for the scale set instances. | `string` | no |
 | azurerm_vmss_subnet_address_prefix | The address prefixes to use for the subnet. | `string` | no |
 | azurerm_vmss_zones | Availability zones for the VMSS (e.g. ["1", "2", "3"]). Requires a zone-capable region. Set to [] to disable. | `list(string)` | no |
-| azurerm_vnet_address_space | The address space that is used the virtual network. | `list(string)` | no |
+| azurerm_vnet_address_space | The address space that is used by the virtual network. | `list(string)` | no |
 | azurerm_windows_admin_username | Admin username for the Windows VM. | `string` | no |
 | azurerm_windows_instance_count | Number of standalone Windows VMs (Nomad clients). Set to 0 to disable. | `number` | no |
 | azurerm_windows_source_image_reference | Source image reference for the Windows VM. | <pre>object({<br/>    publisher = string<br/>    offer     = string<br/>    sku       = string<br/>    version   = string<br/>  })</pre> | no |
