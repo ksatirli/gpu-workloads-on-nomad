@@ -1,0 +1,103 @@
+#cloud-config
+
+# Nomad installation per https://developer.hashicorp.com/nomad/docs/deploy
+apt:
+  preserve_sources_list: true
+  sources:
+    hashicorp:
+      source: "deb [signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
+      keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
+      keyserver: keyserver.ubuntu.com
+    nvidia-container-toolkit-amd64:
+      source: "deb [signed-by=$KEY_FILE] https://nvidia.github.io/libnvidia-container/stable/deb/amd64 /"
+      keyid: DDCAE044F796ECB0
+      keyserver: keyserver.ubuntu.com
+    nvidia-container-toolkit-arm64:
+      source: "deb [signed-by=$KEY_FILE] https://nvidia.github.io/libnvidia-container/stable/deb/arm64 /"
+      keyid: DDCAE044F796ECB0
+      keyserver: keyserver.ubuntu.com
+
+packages:
+  - ca-certificates
+  - curl
+  - gnupg2
+  - libnvidia-container-tools
+  - libnvidia-container1
+  - nomad
+  - nomad-driver-podman
+  - nvidia-container-toolkit
+  - nvidia-container-toolkit-base
+  - podman
+  - unzip
+
+write_files:
+  - path: /etc/nomad.d/nomad-server.hcl
+    owner: root:root
+    permissions: '0644'
+    encoding: b64
+    content: ${nomad_server_config_b64}
+  - path: /etc/nomad.d/nomad-client.hcl
+    owner: root:root
+    permissions: '0644'
+    encoding: b64
+    content: ${nomad_client_config_b64}
+
+# Post-install: CDI for Podman, HashiCorp plugins (not in apt)
+runcmd:
+  # Pick server vs client config by VMSS instance ID (first N instances = servers)
+  - |
+    NOMAD_SERVER_COUNT=${nomad_server_count}
+    VMSS_INSTANCE_COUNT=${vmss_instance_count}
+    if [ "$${NOMAD_SERVER_COUNT}" -ge "$${VMSS_INSTANCE_COUNT}" ]; then
+      # All instances are servers — no need to check instance ID
+      cp /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad.hcl
+    else
+      # Determine instance ID from IMDS name (e.g. "nomad-gpu-vmss_3" -> 3)
+      for _ in 1 2 3 4 5; do
+        INSTANCE_ID=$(curl -s -H "Metadata: true" --connect-timeout 2 "http://169.254.169.254/metadata/instance/compute/name?api-version=2021-02-01&format=text" 2>/dev/null | grep -oE '[0-9]+$' || echo "999")
+        case "$${INSTANCE_ID}" in ''|*[!0-9]*) INSTANCE_ID=999;; esac
+        [ "$${INSTANCE_ID}" != "999" ] && break
+        sleep 2
+      done
+      if [ "$${INSTANCE_ID}" -lt "$${NOMAD_SERVER_COUNT}" ]; then
+        cp /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad.hcl
+      else
+        cp /etc/nomad.d/nomad-client.hcl /etc/nomad.d/nomad.hcl
+      fi
+    fi
+    rm -f /etc/nomad.d/nomad-server.hcl /etc/nomad.d/nomad-client.hcl
+  - |
+    mkdir -p /etc/cdi
+    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml || echo "nvidia-ctk cdi generate skipped (no GPU hardware)"
+    rm -f /usr/share/containers/oci/hooks.d/oci-nvidia-hook.json
+# nomad-autoscaler, nomad-device-nvidia, and nomad-driver-exec2 are not in apt; install from HashiCorp releases
+  - |
+    set -e
+    ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
+    mkdir -p /opt/nomad/data/plugins
+    curl -fsSLo /tmp/nomad-device-nvidia.zip "https://releases.hashicorp.com/nomad-device-nvidia/${nomad_device_nvidia_version}/nomad-device-nvidia_${nomad_device_nvidia_version}_linux_$${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-device-nvidia_SHA256SUMS "https://releases.hashicorp.com/nomad-device-nvidia/${nomad_device_nvidia_version}/nomad-device-nvidia_${nomad_device_nvidia_version}_SHA256SUMS"
+    (cd /tmp && grep "nomad-device-nvidia_${nomad_device_nvidia_version}_linux_$${ARCH}.zip" nomad-device-nvidia_SHA256SUMS | sha256sum -c -)
+    unzip -o /tmp/nomad-device-nvidia.zip -d /opt/nomad/data/plugins
+    chmod +x /opt/nomad/data/plugins/nomad-device-nvidia
+    rm /tmp/nomad-device-nvidia.zip /tmp/nomad-device-nvidia_SHA256SUMS
+  - |
+    set -e
+    ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
+    curl -fsSLo /tmp/nomad-driver-exec2.zip "https://releases.hashicorp.com/nomad-driver-exec2/${nomad_driver_exec2_version}/nomad-driver-exec2_${nomad_driver_exec2_version}_linux_$${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-driver-exec2_SHA256SUMS "https://releases.hashicorp.com/nomad-driver-exec2/${nomad_driver_exec2_version}/nomad-driver-exec2_${nomad_driver_exec2_version}_SHA256SUMS"
+    (cd /tmp && grep "nomad-driver-exec2_${nomad_driver_exec2_version}_linux_$${ARCH}.zip" nomad-driver-exec2_SHA256SUMS | sha256sum -c -)
+    unzip -o /tmp/nomad-driver-exec2.zip -d /opt/nomad/data/plugins
+    chmod +x /opt/nomad/data/plugins/nomad-driver-exec2
+    rm /tmp/nomad-driver-exec2.zip /tmp/nomad-driver-exec2_SHA256SUMS
+  - |
+    set -e
+    ARCH=$(case $(uname -m) in x86_64) echo amd64;; aarch64) echo arm64;; *) echo amd64;; esac)
+    curl -fsSLo /tmp/nomad-autoscaler.zip "https://releases.hashicorp.com/nomad-autoscaler/${nomad_autoscaler_version}/nomad-autoscaler_${nomad_autoscaler_version}_linux_$${ARCH}.zip"
+    curl -fsSLo /tmp/nomad-autoscaler_SHA256SUMS "https://releases.hashicorp.com/nomad-autoscaler/${nomad_autoscaler_version}/nomad-autoscaler_${nomad_autoscaler_version}_SHA256SUMS"
+    (cd /tmp && grep "nomad-autoscaler_${nomad_autoscaler_version}_linux_$${ARCH}.zip" nomad-autoscaler_SHA256SUMS | sha256sum -c -)
+    unzip -o /tmp/nomad-autoscaler.zip -d /usr/local/bin
+    chmod +x /usr/local/bin/nomad-autoscaler
+    rm /tmp/nomad-autoscaler.zip /tmp/nomad-autoscaler_SHA256SUMS
+  - systemctl enable nomad
+  - systemctl start nomad

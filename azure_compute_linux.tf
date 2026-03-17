@@ -1,0 +1,196 @@
+locals {
+  vm_scale_set_name  = "${var.project_identifier}-vmss"
+  gpu_scale_set_name = "${var.project_identifier}-gpu-vmss"
+}
+
+# User-assigned identity for go-discover (principal_id known before VMSS creation)
+# see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity
+resource "azurerm_user_assigned_identity" "vmss" {
+  location            = azurerm_resource_group.main.location
+  name                = "${var.project_identifier}-vmss-identity"
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+# see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine_scale_set
+resource "azurerm_linux_virtual_machine_scale_set" "main" {
+  admin_username = var.azurerm_vmss_admin_username
+
+  custom_data = data.cloudinit_config.linux_vmss.rendered
+
+  location            = azurerm_resource_group.main.location
+  name                = local.vm_scale_set_name
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = var.azurerm_vmss_sku
+  instances           = var.azurerm_vmss_linux_instance_count
+  zones               = length(var.azurerm_vmss_zones) > 0 ? var.azurerm_vmss_zones : null
+  zone_balance        = length(var.azurerm_vmss_zones) > 0
+
+  admin_ssh_key {
+    public_key = tls_private_key.main.public_key_openssh
+    username   = var.azurerm_vmss_admin_username
+  }
+
+  network_interface {
+    name                      = "vmss-nic"
+    primary                   = true
+    network_security_group_id = azurerm_network_security_group.vmss.id
+
+    ip_configuration {
+      name                                   = "internal"
+      primary                                = true
+      subnet_id                              = azurerm_subnet.main.id
+      load_balancer_backend_address_pool_ids = var.azurerm_windows_instance_count > 0 ? [azurerm_lb_backend_address_pool.main.id, azurerm_lb_backend_address_pool.internal[0].id] : [azurerm_lb_backend_address_pool.main.id]
+    }
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+  }
+
+  source_image_reference {
+    offer     = var.azurerm_vmss_linux_source_image_reference.offer
+    publisher = var.azurerm_vmss_linux_source_image_reference.publisher
+    sku       = var.azurerm_vmss_linux_source_image_reference.sku
+    version   = var.azurerm_vmss_linux_source_image_reference.version
+  }
+
+  # Managed Service Identity for go-discover (user-assigned so principal_id exists at plan time)
+  # see https://github.com/hashicorp/go-discover
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.vmss.id]
+  }
+
+  boot_diagnostics {
+    storage_account_uri = azurerm_storage_account.boot_logs.primary_blob_endpoint
+  }
+
+  lifecycle {
+    ignore_changes = [instances]
+  }
+
+  tags = var.tags
+}
+
+# RBAC: allow VMSS MSI to discover instances (required for go-discover provider=azure vm_scale_set)
+# see https://developer.hashicorp.com/nomad/docs/configuration/server_join#microsoft-azure
+resource "azurerm_role_assignment" "vmss_discovery" {
+  principal_id         = azurerm_user_assigned_identity.vmss.principal_id
+  role_definition_name = "Reader"
+  scope                = azurerm_resource_group.main.id
+}
+
+# RBAC: allow VMSS MSI to scale the scale set (required for nomad-autoscaler azure-vmss target)
+# see https://developer.hashicorp.com/nomad/tools/autoscaling/plugins/target/azure-vmss
+resource "azurerm_role_assignment" "vmss_autoscaler" {
+  principal_id         = azurerm_user_assigned_identity.vmss.principal_id
+  role_definition_name = "Virtual Machine Contributor"
+  scope                = azurerm_linux_virtual_machine_scale_set.main.id
+}
+
+# NVIDIA GPU driver extension for N-series VMs
+# see https://learn.microsoft.com/en-us/azure/virtual-machines/extensions/hpccompute-gpu-linux
+# see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_scale_set_extension
+resource "azurerm_virtual_machine_scale_set_extension" "nvidia_gpu" {
+  count = var.azurerm_vmss_install_nvidia_gpu_extension ? 1 : 0
+
+  name                         = "NvidiaGpuDriverLinux"
+  publisher                    = "Microsoft.HpcCompute"
+  type                         = "NvidiaGpuDriverLinux"
+  type_handler_version         = var.azurerm_vmss_nvidia_gpu_extension_version
+  auto_upgrade_minor_version   = true
+  virtual_machine_scale_set_id = azurerm_linux_virtual_machine_scale_set.main.id
+}
+resource "azurerm_user_assigned_identity" "gpu_vmss" {
+  count = var.azurerm_vmss_gpu_enabled ? 1 : 0
+
+  location            = azurerm_resource_group.main.location
+  name                = "${var.project_identifier}-gpu-vmss-identity"
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+resource "azurerm_linux_virtual_machine_scale_set" "gpu" {
+  count = var.azurerm_vmss_gpu_enabled ? 1 : 0
+
+  admin_username = var.azurerm_vmss_admin_username
+  custom_data    = data.cloudinit_config.gpu_vmss.rendered
+
+  location            = azurerm_resource_group.main.location
+  name                = local.gpu_scale_set_name
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = var.azurerm_vmss_gpu_sku
+  instances           = var.azurerm_vmss_gpu_instance_count
+
+  admin_ssh_key {
+    public_key = tls_private_key.main.public_key_openssh
+    username   = var.azurerm_vmss_admin_username
+  }
+
+  network_interface {
+    name                      = "gpu-vmss-nic"
+    primary                   = true
+    network_security_group_id = azurerm_network_security_group.vmss.id
+
+    ip_configuration {
+      name                                   = "internal"
+      primary                                = true
+      subnet_id                              = azurerm_subnet.main.id
+      load_balancer_backend_address_pool_ids = var.azurerm_windows_instance_count > 0 ? [azurerm_lb_backend_address_pool.main.id, azurerm_lb_backend_address_pool.internal[0].id] : [azurerm_lb_backend_address_pool.main.id]
+    }
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+  }
+
+  source_image_reference {
+    offer     = var.azurerm_vmss_linux_source_image_reference.offer
+    publisher = var.azurerm_vmss_linux_source_image_reference.publisher
+    sku       = var.azurerm_vmss_linux_source_image_reference.sku
+    version   = var.azurerm_vmss_linux_source_image_reference.version
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.gpu_vmss[0].id]
+  }
+
+  boot_diagnostics {
+    storage_account_uri = azurerm_storage_account.boot_logs.primary_blob_endpoint
+  }
+
+  lifecycle {
+    ignore_changes = [instances]
+  }
+
+  tags = var.tags
+}
+
+resource "azurerm_virtual_machine_scale_set_extension" "nvidia_gpu_vmss" {
+  count = var.azurerm_vmss_gpu_enabled ? 1 : 0
+
+  name                         = "NvidiaGpuDriverLinux"
+  publisher                    = "Microsoft.HpcCompute"
+  type                         = "NvidiaGpuDriverLinux"
+  type_handler_version         = var.azurerm_vmss_nvidia_gpu_extension_version
+  auto_upgrade_minor_version   = true
+  virtual_machine_scale_set_id = azurerm_linux_virtual_machine_scale_set.gpu[0].id
+}
+
+resource "azurerm_role_assignment" "gpu_vmss_discovery" {
+  count = var.azurerm_vmss_gpu_enabled ? 1 : 0
+
+  principal_id         = azurerm_user_assigned_identity.gpu_vmss[0].principal_id
+  role_definition_name = "Reader"
+  scope                = azurerm_resource_group.main.id
+}
+
+resource "azurerm_role_assignment" "gpu_vmss_autoscaler" {
+  count = var.azurerm_vmss_gpu_enabled ? 1 : 0
+
+  principal_id         = azurerm_user_assigned_identity.gpu_vmss[0].principal_id
+  role_definition_name = "Virtual Machine Contributor"
+  scope                = azurerm_linux_virtual_machine_scale_set.gpu[0].id
+}
