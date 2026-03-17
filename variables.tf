@@ -259,6 +259,11 @@ variable "project_identifier" {
   type        = string
 
   validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.project_identifier))
+    error_message = "project_identifier must contain only lowercase letters, digits, and hyphens."
+  }
+
+  validation {
     condition     = length(replace(var.project_identifier, "-", "")) <= 16
     error_message = "project_identifier (without hyphens) must be 16 characters or fewer for Azure storage account name limits."
   }
@@ -269,7 +274,7 @@ data "http" "my_ip" {
 }
 
 locals {
-  project_identifier_clean = replace(var.project_identifier, "-", "")
+  project_identifier_clean = lower(replace(var.project_identifier, "-", ""))
 
   # Use provided source addresses, or fall back to the Terraform runner's public IP
   ingress_source_addresses = coalesce(var.azurerm_ingress_source_addresses, ["${trimspace(data.http.my_ip.response_body)}/32"])
