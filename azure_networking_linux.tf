@@ -21,6 +21,21 @@ resource "azurerm_network_security_rule" "nomad_from_vnet" {
   ]
 }
 
+# see https://developer.hashicorp.com/nomad/docs/install/production/requirements
+resource "azurerm_network_security_rule" "nomad_serf_udp_from_vnet" {
+  access                      = "Allow"
+  direction                   = "Inbound"
+  name                        = "AllowNomadSerfUDPFromVNet"
+  network_security_group_name = azurerm_network_security_group.vmss.name
+  priority                    = 101
+  protocol                    = "Udp"
+  resource_group_name         = azurerm_resource_group.main.name
+  source_address_prefix       = var.azurerm_vnet_address_space[0]
+  source_port_range           = "*"
+  destination_address_prefix  = "*"
+  destination_port_range      = "4648"
+}
+
 # see https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip
 resource "azurerm_public_ip" "lb" {
   allocation_method   = "Static"
