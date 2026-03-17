@@ -163,10 +163,6 @@ graph TB
 
 ## Usage
 
-To inject sensitive _"Secret Zero"_ type data, the [1Password CLI](https://1password.com/downloads/command-line/) is used to wrap common Terraform commands (`plan`, `apply`, `destroy`).
-
-This repository provides a [Taskfile](./Taskfile.yml)-based workflow.
-
 <!-- BEGIN_TF_DOCS -->
 ### Inputs
 
