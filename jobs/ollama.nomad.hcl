@@ -6,8 +6,12 @@ variable "image_version" {
 
 # Ollama - local LLM inference server
 # see https://github.com/ollama/ollama
+variable "datacenter" {
+  default = "dc1"
+}
+
 job "ollama" {
-  datacenters = ["dc1"]
+  datacenters = [var.datacenter]
   type        = "service"
 
   constraint {

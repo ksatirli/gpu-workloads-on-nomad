@@ -1,7 +1,11 @@
 # Nomad Autoscaler - cluster and horizontal application scaling
 # see https://developer.hashicorp.com/nomad/tools/autoscaling
+variable "datacenter" {
+  default = "dc1"
+}
+
 job "autoscaler" {
-  datacenters = ["dc1"]
+  datacenters = [var.datacenter]
   type        = "service"
 
   constraint {

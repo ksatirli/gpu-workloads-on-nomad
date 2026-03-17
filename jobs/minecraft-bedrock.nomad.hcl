@@ -4,8 +4,12 @@ variable "server_version" {
   description = "Minecraft Bedrock Dedicated Server version"
 }
 
+variable "datacenter" {
+  default = "dc1"
+}
+
 job "minecraft-bedrock" {
-  datacenters = ["dc1"]
+  datacenters = [var.datacenter]
   type        = "service"
 
   constraint {

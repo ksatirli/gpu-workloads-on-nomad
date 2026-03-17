@@ -6,8 +6,12 @@ variable "image_version" {
 
 # Docling - AI-powered document conversion API
 # see https://github.com/docling-project/docling-serve
+variable "datacenter" {
+  default = "dc1"
+}
+
 job "docling" {
-  datacenters = ["dc1"]
+  datacenters = [var.datacenter]
   type        = "service"
 
   constraint {

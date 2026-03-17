@@ -11,8 +11,12 @@ variable "image_version" {
   description = "Container image version for traefik"
 }
 
+variable "datacenter" {
+  default = "dc1"
+}
+
 job "traefik" {
-  datacenters = ["dc1"]
+  datacenters = [var.datacenter]
   type        = "system"
 
   constraint {

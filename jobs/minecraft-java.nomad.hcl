@@ -10,9 +10,13 @@ variable "image_version" {
   description = "Container image version for itzg/minecraft-server"
 }
 
+variable "datacenter" {
+  default = "dc1"
+}
+
 # Minecraft Java Edition Server (containerized)
 job "minecraft-java" {
-  datacenters = ["dc1"]
+  datacenters = [var.datacenter]
   type        = "service"
 
   constraint {

@@ -1,5 +1,9 @@
+variable "datacenter" {
+  default = "dc1"
+}
+
 job "iis" {
-  datacenters = ["dc1"]
+  datacenters = [var.datacenter]
   type        = "service"
 
   constraint {
