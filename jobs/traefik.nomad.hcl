@@ -53,6 +53,7 @@ job "traefik" {
 
         args = [
           "--api.dashboard=true",
+          # NOTE: this is intentional for this demo, it is decidedly not a production-ready configuration
           "--api.insecure=true",
           "--ping=true",
           "--entrypoints.web.address=:${NOMAD_PORT_http}",

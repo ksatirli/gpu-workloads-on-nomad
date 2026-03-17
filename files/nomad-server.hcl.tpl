@@ -15,6 +15,7 @@ advertise {
 }
 
 # CORS headers for web UI (regions API and other browser requests)
+# NOTE: this is intentional for this demo, it is decidedly not a production-ready configuration
 http_api_response_headers {
   "Access-Control-Allow-Origin" = "*"
 }
